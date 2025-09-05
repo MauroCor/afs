@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import logo from '../images/logo.png';
 
 const LoginPage = ({ onLogin }) => {
   const [password, setPassword] = useState('');
@@ -21,7 +22,7 @@ const LoginPage = ({ onLogin }) => {
       <div className="max-w-md w-full bg-white rounded-lg shadow-md p-8">
         <div className="text-center mb-8">
           <img 
-            src="/logo.png" 
+            src={logo} 
             alt="AFS Logo" 
             className="h-16 w-16 mx-auto mb-4"
           />

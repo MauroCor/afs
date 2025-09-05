@@ -5,6 +5,7 @@ import CategorySection from '../components/CategorySection';
 import AddMaterialModal from '../components/AddMaterialModal';
 import ShareButton from '../components/ShareButton';
 import LoginPage from '../components/LoginPage';
+import logo from '../images/logo.png';
 
 const BudgetPage = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -140,7 +141,7 @@ const BudgetPage = () => {
               {/* Logo */}
               <div className="flex-shrink-0">
                 <img
-                  src="/logo.png"
+                  src={logo}
                   alt="AFS Logo"
                   className="h-12 w-12 object-contain"
                 />
@@ -168,11 +169,6 @@ const BudgetPage = () => {
             </div>
             
             <div className="flex items-center space-x-2">
-              {totalSelected > 0 && (
-                <div className="bg-afs-blue text-white px-2 py-1 rounded-full text-xs font-medium">
-                  {totalSelected}
-                </div>
-              )}
               
               {/* Botón de Cerrar Sesión */}
               <button

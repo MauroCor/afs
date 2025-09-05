@@ -1,4 +1,5 @@
 import jsPDF from 'jspdf';
+import logo from '../images/logo.png';
 
 /**
  * Configuración del PDF profesional
@@ -42,8 +43,8 @@ const PDF_CONFIG = {
  * @param {number} size - Tamaño del logo en mm
  */
 const createLogo = (doc, x, y, size = 20) => {
-  // Logo directo desde PNG - sin conversión
-  doc.addImage('/logo.png', 'PNG', x, y, size, size);
+  // Logo importado como módulo - se convierte a base64 automáticamente
+  doc.addImage(logo, 'PNG', x, y, size, size);
 };
 
 /**
