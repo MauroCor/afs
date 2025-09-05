@@ -1,5 +1,5 @@
 {
-  "name": "afs-front",
+  "name": "afs",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
