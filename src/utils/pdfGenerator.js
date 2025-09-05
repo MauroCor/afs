@@ -1,5 +1,5 @@
 import jsPDF from 'jspdf';
-import logo from '../images/logo.png';
+// import logo from '../images/logo.png';
 
 /**
  * Configuración del PDF profesional
@@ -43,8 +43,23 @@ const PDF_CONFIG = {
  * @param {number} size - Tamaño del logo en mm
  */
 const createLogo = (doc, x, y, size = 20) => {
-  // Logo importado como módulo - se convierte a base64 automáticamente
-  doc.addImage(logo, 'PNG', x, y, size, size);
+  // doc.addImage(logo, 'PNG', x, y, size, size);
+  
+  // Logo programático similar al PNG original
+  const centerX = x + size/2;
+  const centerY = y + size/2;
+  doc.setFillColor(240, 240, 240);
+  doc.rect(x, y, size, size, 'F');
+  doc.setDrawColor(200, 200, 200);
+  doc.setLineWidth(0.5);
+  doc.rect(x, y, size, size);
+  doc.setFontSize(12);
+  doc.setTextColor(0, 0, 0);
+  doc.setFont('helvetica', 'bold');
+  doc.text('AFS', centerX, centerY, { align: 'center' });
+  doc.setDrawColor(100, 100, 100);
+  doc.setLineWidth(0.3);
+  doc.line(x + 2, centerY + 5, x + size - 2, centerY + 5);
 };
 
 /**
