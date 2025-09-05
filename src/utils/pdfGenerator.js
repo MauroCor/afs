@@ -267,6 +267,26 @@ export const generatePDF = (materials = [], quantities = {}, obraName = '') => {
 };
 
 /**
+ * Verifica si el navegador soporta Web Share API
+ * @returns {boolean}
+ */
+const supportsWebShare = () => {
+  return (
+    typeof navigator !== 'undefined' &&
+    navigator.share &&
+    typeof navigator.share === 'function'
+  );
+};
+
+/**
+ * Verifica si el navegador soporta File constructor
+ * @returns {boolean}
+ */
+const supportsFileConstructor = () => {
+  return typeof File !== 'undefined' && typeof File === 'function';
+};
+
+/**
  * Genera y comparte un PDF profesional (compatible con móvil)
  * @param {Array} materials - Lista de materiales
  * @param {Object} quantities - Cantidades seleccionadas
@@ -275,47 +295,156 @@ export const generatePDF = (materials = [], quantities = {}, obraName = '') => {
  */
 export const generateAndSharePDF = async (materials = [], quantities = {}, obraName = '') => {
   try {
-    const doc = generatePDF(materials, quantities, obraName);
+    console.log('Iniciando generación de PDF...');
     
-    // Convertir a blob
-    const pdfBlob = doc.output('blob');
+    // Validar parámetros
+    const safeMaterials = Array.isArray(materials) ? materials : [];
+    const safeQuantities = typeof quantities === 'object' && quantities !== null ? quantities : {};
+    const safeObraName = typeof obraName === 'string' ? obraName : '';
     
-    // Verificar si el navegador soporta Web Share API (móvil)
-    if (navigator.share && navigator.canShare && navigator.canShare({ files: [pdfBlob] })) {
+    console.log('Parámetros validados:', { 
+      materialsCount: safeMaterials.length, 
+      quantitiesKeys: Object.keys(safeQuantities).length,
+      obraName: safeObraName 
+    });
+    
+    const doc = generatePDF(safeMaterials, safeQuantities, safeObraName);
+    console.log('PDF generado correctamente');
+    
+    // Convertir a blob de forma segura
+    let pdfBlob;
+    try {
+      pdfBlob = doc.output('blob');
+      console.log('Blob creado, tamaño:', pdfBlob.size);
+    } catch (blobError) {
+      console.error('Error al crear blob:', blobError);
+      throw new Error('No se pudo crear el archivo PDF');
+    }
+    
+    // Intentar compartir con Web Share API si está disponible
+    if (supportsWebShare() && supportsFileConstructor()) {
       try {
-        await navigator.share({
-          title: 'Presupuesto AFS',
-          text: `Presupuesto para ${obraName || 'la obra'}`,
-          files: [new File([pdfBlob], `presupuesto-${obraName || 'obra'}.pdf`, { type: 'application/pdf' })]
-        });
+        console.log('Intentando compartir con Web Share API...');
+        
+        const fileName = `presupuesto-${safeObraName || 'obra'}-${new Date().toISOString().split('T')[0]}.pdf`;
+        const file = new File([pdfBlob], fileName, { type: 'application/pdf' });
+        
+        // Verificar si se puede compartir este archivo
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            title: 'Presupuesto AFS',
+            text: `Presupuesto para ${safeObraName || 'la obra'}`,
+            files: [file]
+          });
+          console.log('PDF compartido exitosamente');
+          return;
+        } else {
+          console.log('Web Share API no soporta archivos, usando fallback');
+        }
       } catch (shareError) {
-        console.log('Error al compartir:', shareError);
-        // Fallback: descargar el archivo
-        downloadPDF(doc, obraName);
+        console.log('Error al compartir con Web Share API:', shareError);
+        // Continuar con fallback
       }
     } else {
-      // Fallback: descargar el archivo
-      downloadPDF(doc, obraName);
+      console.log('Web Share API no disponible, usando fallback');
     }
+    
+    // Fallback: descargar el archivo
+    console.log('Usando fallback de descarga...');
+    downloadPDF(doc, safeObraName);
+    
   } catch (error) {
     console.error('Error al generar PDF:', error);
-    alert('Error al generar el PDF. Por favor, intenta nuevamente.');
+    
+    // Mostrar error más específico
+    let errorMessage = 'Error al generar el PDF. Por favor, intenta nuevamente.';
+    
+    if (error.message.includes('blob')) {
+      errorMessage = 'Error al crear el archivo PDF. Tu navegador podría no ser compatible.';
+    } else if (error.message.includes('share')) {
+      errorMessage = 'Error al compartir el PDF. Se descargará automáticamente.';
+    }
+    
+    alert(errorMessage);
+    
+    // Intentar descarga de emergencia
+    try {
+      const doc = generatePDF(materials, quantities, obraName);
+      downloadPDF(doc, obraName);
+    } catch (fallbackError) {
+      console.error('Error en fallback:', fallbackError);
+      alert('Error crítico. Por favor, recarga la página e intenta nuevamente.');
+    }
   }
 };
 
 /**
- * Descarga el PDF generado
+ * Descarga el PDF generado (compatible con móviles)
  * @param {jsPDF} doc - Documento PDF
  * @param {string} obraName - Nombre de la obra
  */
 const downloadPDF = (doc, obraName = '') => {
-  const pdfBlob = doc.output('blob');
-  const url = URL.createObjectURL(pdfBlob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = `presupuesto-${obraName || 'obra'}-${new Date().toISOString().split('T')[0]}.pdf`;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
+  try {
+    console.log('Iniciando descarga de PDF...');
+    
+    // Generar blob de forma segura
+    let pdfBlob;
+    try {
+      pdfBlob = doc.output('blob');
+      console.log('Blob generado, tamaño:', pdfBlob.size);
+    } catch (blobError) {
+      console.error('Error al generar blob:', blobError);
+      throw new Error('No se pudo generar el archivo PDF');
+    }
+    
+    // Crear URL del blob
+    const url = URL.createObjectURL(pdfBlob);
+    
+    // Crear nombre de archivo seguro
+    const safeObraName = (obraName || 'obra').replace(/[^a-zA-Z0-9-_]/g, '_');
+    const fileName = `presupuesto-${safeObraName}-${new Date().toISOString().split('T')[0]}.pdf`;
+    
+    console.log('Descargando archivo:', fileName);
+    
+    // Crear enlace de descarga
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    link.style.display = 'none';
+    
+    // Agregar al DOM temporalmente
+    document.body.appendChild(link);
+    
+    // Intentar descarga
+    try {
+      link.click();
+      console.log('Descarga iniciada');
+    } catch (clickError) {
+      console.error('Error al hacer click en el enlace:', clickError);
+      
+      // Fallback: abrir en nueva ventana
+      try {
+        window.open(url, '_blank');
+        console.log('Abriendo PDF en nueva ventana');
+      } catch (openError) {
+        console.error('Error al abrir en nueva ventana:', openError);
+        throw new Error('No se pudo descargar ni abrir el PDF');
+      }
+    }
+    
+    // Limpiar después de un tiempo
+    setTimeout(() => {
+      try {
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        console.log('Recursos limpiados');
+      } catch (cleanupError) {
+        console.warn('Error al limpiar recursos:', cleanupError);
+      }
+    }, 1000);
+    
+  } catch (error) {
+    console.error('Error en downloadPDF:', error);
+    throw error;
+  }
 };
