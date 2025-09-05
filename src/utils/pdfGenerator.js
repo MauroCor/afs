@@ -1,4 +1,5 @@
 import jsPDF from 'jspdf';
+import logo from '../images/logo.png';
 
 /**
  * Configuración del PDF profesional
@@ -32,24 +33,43 @@ const PDF_CONFIG = {
 };
 
 /**
- * Crea el logo del PDF
+ * Crea el logo del PDF con imagen real y fallback seguro
  * @param {jsPDF} doc - Documento PDF
  * @param {number} x - Posición X
  * @param {number} y - Posición Y
  * @param {number} size - Tamaño del logo en mm
  */
 const createLogo = (doc, x, y, size = 20) => {
+  try {
+    // Intentar usar la imagen real del logo
+    if (logo) {
+      doc.addImage(logo, 'PNG', x, y, size, size);
+      return;
+    }
+  } catch (imageError) {
+    // Fallback silencioso
+  }
+  
+  // Fallback: Logo programático (si la imagen falla)
   const centerX = x + size/2;
   const centerY = y + size/2;
+  
+  // Fondo del logo
   doc.setFillColor(240, 240, 240);
   doc.rect(x, y, size, size, 'F');
+  
+  // Borde del logo
   doc.setDrawColor(200, 200, 200);
   doc.setLineWidth(0.5);
   doc.rect(x, y, size, size);
+  
+  // Texto AFS
   doc.setFontSize(12);
   doc.setTextColor(0, 0, 0);
   doc.setFont('helvetica', 'bold');
   doc.text('AFS', centerX, centerY, { align: 'center' });
+  
+  // Línea decorativa
   doc.setDrawColor(100, 100, 100);
   doc.setLineWidth(0.3);
   doc.line(x + 2, centerY + 5, x + size - 2, centerY + 5);
@@ -218,7 +238,7 @@ const createFooter = (doc) => {
     doc.setFontSize(fonts.footer.size);
     doc.setTextColor(colors.mediumGray[0], colors.mediumGray[1], colors.mediumGray[2]);
     doc.setFont('helvetica', fonts.footer.weight);
-    doc.text('Generado con AFS Presupuestos', margins.left, pageHeight - margins.bottom - 5);
+    doc.text('Presupuesto generado por AFS', margins.left, pageHeight - margins.bottom - 5);
     doc.text(`Página ${i} de ${pageCount}`, pageWidth - margins.right - 20, pageHeight - margins.bottom - 5, { align: 'right' });
   }
 };
@@ -295,37 +315,24 @@ const supportsFileConstructor = () => {
  */
 export const generateAndSharePDF = async (materials = [], quantities = {}, obraName = '') => {
   try {
-    console.log('Iniciando generación de PDF...');
-    
     // Validar parámetros
     const safeMaterials = Array.isArray(materials) ? materials : [];
     const safeQuantities = typeof quantities === 'object' && quantities !== null ? quantities : {};
     const safeObraName = typeof obraName === 'string' ? obraName : '';
     
-    console.log('Parámetros validados:', { 
-      materialsCount: safeMaterials.length, 
-      quantitiesKeys: Object.keys(safeQuantities).length,
-      obraName: safeObraName 
-    });
-    
     const doc = generatePDF(safeMaterials, safeQuantities, safeObraName);
-    console.log('PDF generado correctamente');
     
     // Convertir a blob de forma segura
     let pdfBlob;
     try {
       pdfBlob = doc.output('blob');
-      console.log('Blob creado, tamaño:', pdfBlob.size);
     } catch (blobError) {
-      console.error('Error al crear blob:', blobError);
       throw new Error('No se pudo crear el archivo PDF');
     }
     
     // Intentar compartir con Web Share API si está disponible
     if (supportsWebShare() && supportsFileConstructor()) {
       try {
-        console.log('Intentando compartir con Web Share API...');
-        
         const fileName = `presupuesto-${safeObraName || 'obra'}-${new Date().toISOString().split('T')[0]}.pdf`;
         const file = new File([pdfBlob], fileName, { type: 'application/pdf' });
         
@@ -336,26 +343,17 @@ export const generateAndSharePDF = async (materials = [], quantities = {}, obraN
             text: `Presupuesto para ${safeObraName || 'la obra'}`,
             files: [file]
           });
-          console.log('PDF compartido exitosamente');
           return;
-        } else {
-          console.log('Web Share API no soporta archivos, usando fallback');
         }
       } catch (shareError) {
-        console.log('Error al compartir con Web Share API:', shareError);
         // Continuar con fallback
       }
-    } else {
-      console.log('Web Share API no disponible, usando fallback');
     }
     
     // Fallback: descargar el archivo
-    console.log('Usando fallback de descarga...');
     downloadPDF(doc, safeObraName);
     
   } catch (error) {
-    console.error('Error al generar PDF:', error);
-    
     // Mostrar error más específico
     let errorMessage = 'Error al generar el PDF. Por favor, intenta nuevamente.';
     
@@ -372,7 +370,6 @@ export const generateAndSharePDF = async (materials = [], quantities = {}, obraN
       const doc = generatePDF(materials, quantities, obraName);
       downloadPDF(doc, obraName);
     } catch (fallbackError) {
-      console.error('Error en fallback:', fallbackError);
       alert('Error crítico. Por favor, recarga la página e intenta nuevamente.');
     }
   }
@@ -385,15 +382,11 @@ export const generateAndSharePDF = async (materials = [], quantities = {}, obraN
  */
 const downloadPDF = (doc, obraName = '') => {
   try {
-    console.log('Iniciando descarga de PDF...');
-    
     // Generar blob de forma segura
     let pdfBlob;
     try {
       pdfBlob = doc.output('blob');
-      console.log('Blob generado, tamaño:', pdfBlob.size);
     } catch (blobError) {
-      console.error('Error al generar blob:', blobError);
       throw new Error('No se pudo generar el archivo PDF');
     }
     
@@ -403,8 +396,6 @@ const downloadPDF = (doc, obraName = '') => {
     // Crear nombre de archivo seguro
     const safeObraName = (obraName || 'obra').replace(/[^a-zA-Z0-9-_]/g, '_');
     const fileName = `presupuesto-${safeObraName}-${new Date().toISOString().split('T')[0]}.pdf`;
-    
-    console.log('Descargando archivo:', fileName);
     
     // Crear enlace de descarga
     const link = document.createElement('a');
@@ -418,16 +409,11 @@ const downloadPDF = (doc, obraName = '') => {
     // Intentar descarga
     try {
       link.click();
-      console.log('Descarga iniciada');
     } catch (clickError) {
-      console.error('Error al hacer click en el enlace:', clickError);
-      
       // Fallback: abrir en nueva ventana
       try {
         window.open(url, '_blank');
-        console.log('Abriendo PDF en nueva ventana');
       } catch (openError) {
-        console.error('Error al abrir en nueva ventana:', openError);
         throw new Error('No se pudo descargar ni abrir el PDF');
       }
     }
@@ -437,14 +423,12 @@ const downloadPDF = (doc, obraName = '') => {
       try {
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
-        console.log('Recursos limpiados');
       } catch (cleanupError) {
-        console.warn('Error al limpiar recursos:', cleanupError);
+        // Limpieza silenciosa
       }
     }, 1000);
     
   } catch (error) {
-    console.error('Error en downloadPDF:', error);
     throw error;
   }
 };
