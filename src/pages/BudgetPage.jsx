@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { initialMaterials, categories } from '../data/materials';
 import { generateAndSharePDF } from '../utils/pdfGenerator';
 import CategorySection from '../components/CategorySection';
@@ -65,7 +65,7 @@ const BudgetPage = () => {
   // Guardar datos cuando cambien
   useEffect(() => {
     saveData();
-  }, [materials, quantities, obraName]);
+  }, [saveData]);
 
   const loadData = () => {
     try {
@@ -88,7 +88,7 @@ const BudgetPage = () => {
     }
   };
 
-  const saveData = () => {
+  const saveData = useCallback(() => {
     try {
       localStorage.setItem('afs-materials', JSON.stringify(materials));
       localStorage.setItem('afs-quantities', JSON.stringify(quantities));
@@ -96,7 +96,7 @@ const BudgetPage = () => {
     } catch (error) {
       console.error('Error al guardar datos:', error);
     }
-  };
+  }, [materials, quantities, obraName]);
 
   const handleQuantityChange = (materialId, newQuantity) => {
     setQuantities(prev => ({
