@@ -62,11 +62,6 @@ const BudgetPage = () => {
     }
   };
 
-  // Guardar datos cuando cambien
-  useEffect(() => {
-    saveData();
-  }, [saveData]);
-
   const loadData = () => {
     try {
       // Intentar cargar desde localStorage
@@ -97,6 +92,11 @@ const BudgetPage = () => {
       console.error('Error al guardar datos:', error);
     }
   }, [materials, quantities, obraName]);
+
+  // Guardar datos cuando cambien
+  useEffect(() => {
+    saveData();
+  }, [saveData]);
 
   const handleQuantityChange = (materialId, newQuantity) => {
     setQuantities(prev => ({
