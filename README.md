@@ -7,7 +7,7 @@
 - **Frontend**: React 18 + Tailwind CSS
 - **PDF**: jsPDF con diseño profesional
 - **Estado**: React Hooks + LocalStorage
-- **Deploy**: GitLab Pages
+- **Deploy**: GitHub Pages
 
 ## ✨ Características
 
@@ -52,7 +52,7 @@ npm start
 
 ## 📱 Deploy
 
-Configurado para GitLab Pages con autenticación local y generación de PDF en cliente.
+Configurado para GitHub Pages con autenticación local y generación de PDF en cliente.
 
 ---
 
