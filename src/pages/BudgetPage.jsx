@@ -137,48 +137,26 @@ const BudgetPage = () => {
       <div className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-mobile mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
+            {/* Logo y título en la misma línea */}
             <div className="flex items-center space-x-3">
-              {/* Logo */}
-              <div className="flex-shrink-0">
-                <img
-                  src={logo}
-                  alt="AFS Logo"
-                  className="h-12 w-12 object-contain"
-                />
-              </div>
-              
-              {/* Título y descripción */}
-              <div className="flex-1">
-                <h1 className="text-xl font-bold text-gray-900">
-                  Presupuestos
-                </h1>
-                <p className="text-sm text-gray-500">
-                  Gestión de materiales de construcción
-                </p>
-                {/* Campo nombre de obra */}
-                <div className="mt-2">
-                  <input
-                    type="text"
-                    value={obraName}
-                    onChange={(e) => setObraName(e.target.value)}
-                    className="text-sm font-medium text-gray-700 bg-transparent border-b border-gray-300 focus:border-afs-blue focus:outline-none py-1"
-                    placeholder="Nombre de la obra"
-                  />
-                </div>
-              </div>
+              <img
+                src={logo}
+                alt="AFS Logo"
+                className="h-12 w-12 object-contain"
+              />
+              <h1 className="text-xl font-bold text-gray-900">
+                Presupuestos
+              </h1>
             </div>
             
-            <div className="flex items-center space-x-2">
-              
-              {/* Botón de Cerrar Sesión */}
-              <button
-                onClick={handleLogout}
-                className="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xs font-medium transition duration-200"
-                title="Cerrar sesión"
-              >
-                Salir
-              </button>
-            </div>
+            {/* Botón de Cerrar Sesión */}
+            <button
+              onClick={handleLogout}
+              className="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xs font-medium transition duration-200"
+              title="Cerrar sesión"
+            >
+              Salir
+            </button>
           </div>
         </div>
       </div>
@@ -186,6 +164,18 @@ const BudgetPage = () => {
       {/* Contenido principal */}
       <div className="max-w-mobile mx-auto px-4 py-6">
         {/* Botón agregar material */}
+        {/* Campo nombre de obra */}
+        <div className="mb-4">
+          <input
+            type="text"
+            value={obraName}
+            onChange={(e) => setObraName(e.target.value)}
+            className="w-full text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg px-3 py-2 focus:border-afs-blue focus:outline-none"
+            placeholder="Nombre de la obra"
+          />
+        </div>
+
+        {/* Botón Agregar Material */}
         <div className="mb-6">
           <button
             onClick={() => setIsModalOpen(true)}
