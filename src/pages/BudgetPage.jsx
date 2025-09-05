@@ -110,6 +110,7 @@ const BudgetPage = () => {
     setMaterials(prev => [...prev, newMaterial]);
   };
 
+
   const handleGeneratePDF = async () => {
     setIsGeneratingPDF(true);
     

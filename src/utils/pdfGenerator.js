@@ -1,5 +1,6 @@
 import jsPDF from 'jspdf';
-// import logo from '../images/logo.png';
+import html2canvas from 'html2canvas';
+import logo from '../images/logo.png';
 
 /**
  * Configuración del PDF profesional
@@ -274,7 +275,83 @@ export const generatePDF = (materials, quantities, obraName = '') => {
 };
 
 /**
- * Genera y comparte un PDF con los materiales especificados
+ * Crea el contenido HTML para el PDF (compatible con móvil)
+ * @param {Array} materials - Lista de materiales
+ * @param {Object} quantities - Cantidades seleccionadas
+ * @param {string} obraName - Nombre de la obra
+ * @returns {string} HTML del contenido
+ */
+const createPDFContent = (materials, quantities, obraName) => {
+  const currentDate = new Date().toLocaleDateString('es-ES');
+  
+  // Agrupar materiales por categoría
+  const materialsByCategory = groupMaterialsByCategory(materials, quantities);
+  
+  let categoriesHTML = '';
+  
+  Object.keys(materialsByCategory).forEach(category => {
+    const categoryMaterials = materialsByCategory[category];
+    
+    let materialsHTML = '';
+    categoryMaterials.forEach(material => {
+      materialsHTML += `
+        <tr>
+          <td style="padding: 8px; border-bottom: 1px solid #eee;">${material.name}</td>
+          <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: center;">${material.unit}</td>
+          <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: center;">${material.quantity}</td>
+        </tr>
+      `;
+    });
+    
+    categoriesHTML += `
+      <div style="margin-bottom: 30px;">
+        <h3 style="background: #f8f9fa; padding: 0px 12px 15px 12px; margin: 0 0 10px 0; border-left: 4px solid #333; color: #333; font-size: 16px; font-weight: bold; line-height: 16px;">${category}</h3>
+        <table style="width: 100%; border-collapse: collapse;">
+          <thead>
+            <tr style="background: #f8f9fa;">
+              <th style="padding: 0px 6px 15px 12px; text-align: left; border-bottom: 2px solid #333; font-weight: bold; vertical-align: middle;">Material</th>
+              <th style="padding: 0px 6px 15px 12px; text-align: center; border-bottom: 2px solid #333; font-weight: bold; vertical-align: middle;">Unidad</th>
+              <th style="padding: 0px 6px 15px 12px; text-align: center; border-bottom: 2px solid #333; font-weight: bold; vertical-align: middle;">Cantidad</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${materialsHTML}
+          </tbody>
+        </table>
+      </div>
+    `;
+  });
+  
+  return `
+    <div style="max-width: 800px; margin: 0 auto; background: white;">
+      <!-- Header -->
+      <div style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #333;">
+        <div style="display: flex; align-items: flex-start;">
+          <img src="${logo}" alt="Logo AFS" style="width: 50px; height: 50px; margin-right: 15px; margin-top: -5px; object-fit: contain;">
+          <div>
+            <h1 style="margin: 0; font-size: 24px; color: #333; font-weight: normal; line-height: 1;">Presupuesto</h1>
+            ${obraName ? `<p style="margin: 5px 0 0 0; font-size: 14px; color: #666;">Obra: ${obraName}</p>` : ''}
+          </div>
+        </div>
+        <div style="text-align: right;">
+          <p style="margin: 0; font-size: 12px; color: #999;">${currentDate}</p>
+        </div>
+      </div>
+      
+      <!-- Contenido de materiales -->
+      ${Object.keys(materialsByCategory).length > 0 ? categoriesHTML : '<p style="text-align: center; color: #999; font-style: italic;">No hay materiales seleccionados</p>'}
+      
+      
+      <!-- Footer -->
+      <div style="margin-top: 30px; text-align: center; font-size: 10px; color: #999;">
+        Generado por AFS
+      </div>
+    </div>
+  `;
+};
+
+/**
+ * Genera y comparte un PDF con los materiales especificados (compatible con móvil)
  * @param {Array} materials - Lista de materiales
  * @param {Object} quantities - Cantidades seleccionadas
  * @param {string} obraName - Nombre de la obra
@@ -282,11 +359,56 @@ export const generatePDF = (materials, quantities, obraName = '') => {
  */
 export const generateAndSharePDF = async (materials, quantities, obraName = '') => {
   try {
-    // Generar PDF
-    const doc = generatePDF(materials, quantities, obraName);
+    // Crear elemento HTML temporal para el PDF
+    const pdfContent = createPDFContent(materials, quantities, obraName);
+    
+    // Agregar al DOM temporalmente
+    const tempContainer = document.createElement('div');
+    tempContainer.style.position = 'absolute';
+    tempContainer.style.left = '-9999px';
+    tempContainer.style.top = '-9999px';
+    tempContainer.style.width = '800px';
+    tempContainer.style.backgroundColor = 'white';
+    tempContainer.style.padding = '20px';
+    tempContainer.style.fontFamily = 'Arial, sans-serif';
+    tempContainer.innerHTML = pdfContent;
+    
+    document.body.appendChild(tempContainer);
+    
+    // Generar canvas desde HTML
+    const canvas = await html2canvas(tempContainer, {
+      scale: 2,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: '#ffffff'
+    });
+    
+    // Crear PDF desde canvas
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    
+    const imgWidth = 210; // A4 width in mm
+    const pageHeight = 295; // A4 height in mm
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    let heightLeft = imgHeight;
+    
+    let position = 0;
+    
+    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+    
+    while (heightLeft >= 0) {
+      position = heightLeft - imgHeight;
+      pdf.addPage();
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+    }
+    
+    // Limpiar DOM
+    document.body.removeChild(tempContainer);
     
     // Convertir a blob
-    const pdfBlob = doc.output('blob');
+    const pdfBlob = pdf.output('blob');
     
     // Verificar si el navegador soporta Web Share API
     if (navigator.share && navigator.canShare && navigator.canShare({ files: [pdfBlob] })) {
@@ -299,11 +421,11 @@ export const generateAndSharePDF = async (materials, quantities, obraName = '') 
       } catch (shareError) {
         console.log('Error al compartir:', shareError);
         // Fallback: descargar el archivo
-        downloadPDF(doc, obraName);
+        downloadPDF(pdf, obraName);
       }
     } else {
       // Fallback: descargar el archivo
-      downloadPDF(doc, obraName);
+      downloadPDF(pdf, obraName);
     }
   } catch (error) {
     console.error('Error al generar PDF:', error);
