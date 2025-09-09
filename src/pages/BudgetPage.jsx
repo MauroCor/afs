@@ -146,7 +146,7 @@ const BudgetPage = () => {
                 className="h-12 w-12 object-contain"
               />
               <h1 className="text-xl font-bold text-gray-900">
-                Presupuestos
+                Materiales
               </h1>
             </div>
             
@@ -185,7 +185,7 @@ const BudgetPage = () => {
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
             </svg>
-            <span>Agregar Material</span>
+            <span>Agregar material</span>
           </button>
         </div>
 
@@ -220,7 +220,7 @@ const BudgetPage = () => {
               onClick={() => setIsModalOpen(true)}
               className="btn-primary"
             >
-              Agregar Material
+              Agregar material
             </button>
           </div>
         )}

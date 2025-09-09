@@ -150,11 +150,11 @@ const createHeader = (doc, obraName) => {
     doc.setFont('helvetica', 'normal'); // Sin negrita, más discreto
     doc.text(obraName, pageWidth - margins.right - 5, contentY, { align: 'right' });
   } else {
-    // Si no hay nombre de obra, usar "Presupuesto" como fallback
+    // Si no hay nombre de obra, usar "" como fallback
     doc.setFontSize(11);
     doc.setTextColor(PDF_CONFIG.colors.black[0], PDF_CONFIG.colors.black[1], PDF_CONFIG.colors.black[2]);
     doc.setFont('helvetica', 'normal');
-    doc.text('Presupuesto', pageWidth - margins.right - 5, contentY, { align: 'right' });
+    doc.text('', pageWidth - margins.right - 5, contentY, { align: 'right' });
   }
   
 };
@@ -195,7 +195,7 @@ const groupMaterialsByCategory = (materials, quantities) => {
 const createCategoryTable = (doc, category, materials, startY) => {
   const { margins, pageWidth, colors, fonts } = PDF_CONFIG;
   const tableWidth = pageWidth - margins.left - margins.right;
-  const colWidths = [tableWidth * 0.6, tableWidth * 0.2, tableWidth * 0.2];
+  const colWidths = [tableWidth * 0.25, tableWidth * 0.55, tableWidth * 0.2]; // Sección, Detalle, Cantidad
   const rowHeight = 8;
   const headerHeight = 10;
   
@@ -221,9 +221,9 @@ const createCategoryTable = (doc, category, materials, startY) => {
   doc.setFont('helvetica', fonts.tableHeader.weight);
   
   let xPos = margins.left + 5;
-  doc.text('Material', xPos, currentY + 5);
+  doc.text('Sección', xPos, currentY + 5);
   xPos += colWidths[0];
-  doc.text('Unidad', xPos, currentY + 5);
+  doc.text('Detalle', xPos, currentY + 5);
   xPos += colWidths[1];
   doc.text('Cantidad', xPos, currentY + 5);
   
@@ -248,13 +248,15 @@ const createCategoryTable = (doc, category, materials, startY) => {
     doc.setFont('helvetica', fonts.tableContent.weight);
     
     xPos = margins.left + 5;
-    // Manejar nombres largos con ajuste automático
-    const maxWidth = colWidths[0] - 10;
+    // Sección
+    doc.text(material.section, xPos, currentY + 5);
+    xPos += colWidths[0];
+    // Detalle (nombre del material) - manejar nombres largos con ajuste automático
+    const maxWidth = colWidths[1] - 10;
     const materialName = doc.splitTextToSize(material.name, maxWidth);
     doc.text(materialName, xPos, currentY + 5);
-    xPos += colWidths[0];
-    doc.text(material.unit, xPos, currentY + 5);
     xPos += colWidths[1];
+    // Cantidad
     doc.text(material.quantity.toString(), xPos, currentY + 5);
     
     currentY += rowHeight;
@@ -283,7 +285,7 @@ const createFooter = (doc) => {
     doc.setFontSize(fonts.footer.size);
     doc.setTextColor(colors.mediumGray[0], colors.mediumGray[1], colors.mediumGray[2]);
     doc.setFont('helvetica', fonts.footer.weight);
-    doc.text('Presupuesto generado por AFS', margins.left, pageHeight - margins.bottom - 5);
+    doc.text('AFS - Materiales para obra', margins.left, pageHeight - margins.bottom - 5);
     doc.text(`Página ${i} de ${pageCount}`, pageWidth - margins.right - 20, pageHeight - margins.bottom - 5, { align: 'right' });
   }
 };
@@ -378,14 +380,14 @@ export const generateAndSharePDF = async (materials = [], quantities = {}, obraN
     // Intentar compartir con Web Share API si está disponible
     if (supportsWebShare() && supportsFileConstructor()) {
       try {
-        const fileName = `presupuesto-${safeObraName || 'obra'}-${new Date().toISOString().split('T')[0]}.pdf`;
+        const fileName = `materiales-${safeObraName || 'obra'}-${new Date().toISOString().split('T')[0]}.pdf`;
         const file = new File([pdfBlob], fileName, { type: 'application/pdf' });
         
         // Verificar si se puede compartir este archivo
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
           await navigator.share({
-            title: 'Presupuesto AFS',
-            text: `Presupuesto para ${safeObraName || 'la obra'}`,
+            title: 'AFS',
+            text: `Materiales para ${safeObraName || 'la obra'}`,
             files: [file]
           });
           return;
@@ -440,7 +442,7 @@ const downloadPDF = (doc, obraName = '') => {
     
     // Crear nombre de archivo seguro
     const safeObraName = (obraName || 'obra').replace(/[^a-zA-Z0-9-_]/g, '_');
-    const fileName = `presupuesto-${safeObraName}-${new Date().toISOString().split('T')[0]}.pdf`;
+    const fileName = `materiales-${safeObraName}-${new Date().toISOString().split('T')[0]}.pdf`;
     
     // Crear enlace de descarga
     const link = document.createElement('a');

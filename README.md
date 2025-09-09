@@ -1,6 +1,6 @@
-# AFS Presupuestos
+# AFS Lista de Materiales
 
-**Sistema de gestión de presupuestos de construcción con generación de PDF profesional**
+**Sistema de listado de materiales de obra con generación de PDF profesional**
 
 ## 🚀 Stack Tecnológico
 

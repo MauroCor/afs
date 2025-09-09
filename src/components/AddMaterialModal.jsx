@@ -1,25 +1,60 @@
-import React, { useState } from 'react';
-import { categories } from '../data/materials';
+import React, { useState, useEffect } from 'react';
+import { categories, initialMaterials } from '../data/materials';
 
 const AddMaterialModal = ({ isOpen, onClose, onAddMaterial }) => {
   const [formData, setFormData] = useState({
     name: '',
-    unit: '',
+    section: '',
     category: categories[0]
   });
 
+  // Obtener secciones disponibles para la categoría seleccionada
+  const getAvailableSections = (category) => {
+    const categoryMaterials = initialMaterials.filter(material => material.category === category);
+    const sections = [...new Set(categoryMaterials.map(material => material.section))];
+    // Agregar "Otros" como opción adicional
+    sections.push('Otros');
+    return sections.sort();
+  };
+
+  const [availableSections, setAvailableSections] = useState(getAvailableSections(categories[0]));
+
+  // Inicializar la sección cuando se abre el modal
+  useEffect(() => {
+    if (isOpen) {
+      const sections = getAvailableSections(formData.category);
+      setAvailableSections(sections);
+      setFormData(prev => ({
+        ...prev,
+        section: sections[0] || ''
+      }));
+    }
+  }, [isOpen, formData.category]);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    
+    if (name === 'category') {
+      // Cuando cambia la categoría, actualizar las secciones disponibles y resetear la sección
+      const newSections = getAvailableSections(value);
+      setAvailableSections(newSections);
+      setFormData(prev => ({
+        ...prev,
+        [name]: value,
+        section: newSections[0] || ''
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    if (!formData.name.trim() || !formData.unit.trim()) {
+    if (!formData.name.trim() || !formData.section.trim()) {
       alert('Por favor completa todos los campos');
       return;
     }
@@ -30,7 +65,7 @@ const AddMaterialModal = ({ isOpen, onClose, onAddMaterial }) => {
     const newMaterial = {
       id: newId,
       name: formData.name.trim(),
-      unit: formData.unit.trim(),
+      section: formData.section.trim(),
       category: formData.category
     };
 
@@ -39,7 +74,7 @@ const AddMaterialModal = ({ isOpen, onClose, onAddMaterial }) => {
     // Resetear formulario
     setFormData({
       name: '',
-      unit: '',
+      section: '',
       category: categories[0]
     });
     
@@ -49,7 +84,7 @@ const AddMaterialModal = ({ isOpen, onClose, onAddMaterial }) => {
   const handleClose = () => {
     setFormData({
       name: '',
-      unit: '',
+      section: '',
       category: categories[0]
     });
     onClose();
@@ -63,7 +98,7 @@ const AddMaterialModal = ({ isOpen, onClose, onAddMaterial }) => {
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200">
           <h2 className="text-lg font-semibold text-gray-900">
-            Agregar Material
+            Agregar material
           </h2>
           <button
             onClick={handleClose}
@@ -95,22 +130,6 @@ const AddMaterialModal = ({ isOpen, onClose, onAddMaterial }) => {
           </div>
 
           <div>
-            <label htmlFor="unit" className="block text-sm font-medium text-gray-700 mb-2">
-              Unidad
-            </label>
-            <input
-              type="text"
-              id="unit"
-              name="unit"
-              value={formData.unit}
-              onChange={handleInputChange}
-              className="input-field"
-              placeholder="Ej: bolsas, m³, kg"
-              required
-            />
-          </div>
-
-          <div>
             <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
               Categoría
             </label>
@@ -124,6 +143,27 @@ const AddMaterialModal = ({ isOpen, onClose, onAddMaterial }) => {
               {categories.map(category => (
                 <option key={category} value={category}>
                   {category}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label htmlFor="section" className="block text-sm font-medium text-gray-700 mb-2">
+              Sección
+            </label>
+            <select
+              id="section"
+              name="section"
+              value={formData.section}
+              onChange={handleInputChange}
+              className="input-field"
+              required
+            >
+              <option value="">Selecciona una sección</option>
+              {availableSections.map(section => (
+                <option key={section} value={section}>
+                  {section}
                 </option>
               ))}
             </select>
