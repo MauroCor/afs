@@ -8,7 +8,10 @@ const LoginPage = ({ onLogin }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    if (password === 'afs2024') {
+    // Usar variable de entorno para la contraseña
+    const correctPassword = process.env.REACT_APP_PASSWORD;
+    
+    if (password === correctPassword) {
       localStorage.setItem('afs_authenticated', 'true');
       onLogin();
     } else {
