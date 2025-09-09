@@ -83,24 +83,54 @@ const createLogo = (doc, x, y, size = 20) => {
 const createHeader = (doc, obraName) => {
   const { margins, pageWidth } = PDF_CONFIG;
   
-  // Logo
-  createLogo(doc, margins.left, margins.top, 18);
+  // Logo más arriba y centrado verticalmente con el contacto
+  const logoSize = 28;
+  const logoY = margins.top - 2; // Un poco más arriba
+  createLogo(doc, margins.left, logoY, logoSize);
   
-  // Título
-  doc.setFontSize(PDF_CONFIG.fonts.title.size);
-  doc.setTextColor(PDF_CONFIG.colors.black[0], PDF_CONFIG.colors.black[1], PDF_CONFIG.colors.black[2]);
-  doc.setFont('helvetica', PDF_CONFIG.fonts.title.weight);
-  doc.text('Presupuesto', margins.left + 25, margins.top + 8);
+  // Información profesional - más grande y mejor organizada
+  const professionalInfo = [
+    'ADRIÁN FERNANDO SECULINI',
+    'Maestro Mayor de Obras - M.P. 1663/1',
+    'Eduardo Olocco 2113 - Santa Elena - Colonia Tirolesa',
+    '3517642188 / adrianseculini@hotmail.com'
+  ];
   
-  // Nombre de la obra
-  if (obraName && obraName.trim()) {
-    doc.setFontSize(PDF_CONFIG.fonts.subtitle.size);
-    doc.setFont('helvetica', PDF_CONFIG.fonts.subtitle.weight);
-    doc.setTextColor(PDF_CONFIG.colors.darkGray[0], PDF_CONFIG.colors.darkGray[1], PDF_CONFIG.colors.darkGray[2]);
-    doc.text(obraName, margins.left + 25, margins.top + 16);
-  }
+  // Posición inicial para la información profesional (centrada con el logo)
+  let infoY = logoY + 8; // Centrado con el logo
   
-  // Fecha
+  professionalInfo.forEach((line, index) => {
+    if (index === 0) {
+      // Nombre más grande y prominente
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(PDF_CONFIG.colors.black[0], PDF_CONFIG.colors.black[1], PDF_CONFIG.colors.black[2]);
+    } else if (index === 1) {
+      // Título profesional
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(PDF_CONFIG.colors.darkGray[0], PDF_CONFIG.colors.darkGray[1], PDF_CONFIG.colors.darkGray[2]);
+    } else {
+      // Información de contacto
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(PDF_CONFIG.colors.mediumGray[0], PDF_CONFIG.colors.mediumGray[1], PDF_CONFIG.colors.mediumGray[2]);
+    }
+    
+    doc.text(line, pageWidth - margins.right - 5, infoY, { align: 'right' });
+    infoY += index === 0 ? 7 : 5; // Mejor espaciado
+  });
+  
+  // Línea separadora elegante
+  const separatorY = logoY + logoSize + 8;
+  doc.setDrawColor(200, 200, 200);
+  doc.setLineWidth(0.5);
+  doc.line(margins.left, separatorY, pageWidth - margins.right, separatorY);
+  
+  // Nombre de la obra y fecha en una línea, más discretos
+  const contentY = separatorY + 8;
+  
+  // Fecha a la izquierda
   const now = new Date();
   const dateString = now.toLocaleDateString('es-ES', {
     year: 'numeric',
@@ -108,10 +138,25 @@ const createHeader = (doc, obraName) => {
     day: '2-digit'
   });
   
-  doc.setFontSize(PDF_CONFIG.fonts.date.size);
-  doc.setFont('helvetica', PDF_CONFIG.fonts.date.weight);
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'normal');
   doc.setTextColor(PDF_CONFIG.colors.mediumGray[0], PDF_CONFIG.colors.mediumGray[1], PDF_CONFIG.colors.mediumGray[2]);
-  doc.text(dateString, pageWidth - margins.right - 20, margins.top + 8, { align: 'right' });
+  doc.text(`Fecha: ${dateString}`, margins.left, contentY);
+  
+  // Nombre de la obra a la derecha, más discreto
+  if (obraName && obraName.trim()) {
+    doc.setFontSize(11);
+    doc.setTextColor(PDF_CONFIG.colors.black[0], PDF_CONFIG.colors.black[1], PDF_CONFIG.colors.black[2]);
+    doc.setFont('helvetica', 'normal'); // Sin negrita, más discreto
+    doc.text(obraName, pageWidth - margins.right - 5, contentY, { align: 'right' });
+  } else {
+    // Si no hay nombre de obra, usar "Presupuesto" como fallback
+    doc.setFontSize(11);
+    doc.setTextColor(PDF_CONFIG.colors.black[0], PDF_CONFIG.colors.black[1], PDF_CONFIG.colors.black[2]);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Presupuesto', pageWidth - margins.right - 5, contentY, { align: 'right' });
+  }
+  
 };
 
 /**
@@ -163,7 +208,7 @@ const createCategoryTable = (doc, category, materials, startY) => {
   doc.setFontSize(fonts.category.size);
   doc.setTextColor(colors.black[0], colors.black[1], colors.black[2]);
   doc.setFont('helvetica', fonts.category.weight);
-  doc.text(category, margins.left + 5, currentY + 6);
+  doc.text(category, margins.left + tableWidth/2, currentY + 6, { align: 'center' });
   
   currentY += headerHeight + 2;
   
@@ -264,7 +309,7 @@ export const generatePDF = (materials = [], quantities = {}, obraName = '') => {
   // Agrupar materiales por categoría
   const materialsByCategory = groupMaterialsByCategory(materials, quantities);
   
-  let currentY = PDF_CONFIG.margins.top + 40; // Espacio después del encabezado
+  let currentY = PDF_CONFIG.margins.top + 50; // Espacio después del encabezado (ajustado para el nuevo diseño)
   
   // Crear tabla para cada categoría
   Object.keys(materialsByCategory).forEach(category => {
