@@ -46,19 +46,21 @@ const BudgetPage = () => {
     setIsAuthenticated(true);
   };
 
+  // Función para resetear quantities
+  const resetQuantities = () => {
+    const initialQuantities = {};
+    initialMaterials.forEach(material => {
+      initialQuantities[material.id] = 0;
+    });
+    return initialQuantities;
+  };
+
   // Función para cerrar sesión
   const handleLogout = () => {
     if (window.confirm('¿Estás seguro de que quieres cerrar sesión?')) {
       localStorage.removeItem('afs_authenticated');
       setIsAuthenticated(false);
-      // Limpiar datos locales
-      setQuantities(() => {
-        const initialQuantities = {};
-        initialMaterials.forEach(material => {
-          initialQuantities[material.id] = 0;
-        });
-        return initialQuantities;
-      });
+      setQuantities(resetQuantities());
       setObraName('');
     }
   };
@@ -124,8 +126,6 @@ const BudgetPage = () => {
     }
   };
 
-  // Calcular total de materiales seleccionados
-  const totalSelected = Object.values(quantities).reduce((total, qty) => total + qty, 0);
 
   // Si no está autenticado, mostrar login
   if (!isAuthenticated) {
@@ -164,7 +164,6 @@ const BudgetPage = () => {
 
       {/* Contenido principal */}
       <div className="max-w-mobile mx-auto px-4 py-6">
-        {/* Botón agregar material */}
         {/* Campo nombre de obra */}
         <div className="mb-4">
           <input
@@ -176,7 +175,6 @@ const BudgetPage = () => {
           />
         </div>
 
-        {/* Botón Agregar Material */}
         <div className="mb-6">
           <button
             onClick={() => setIsModalOpen(true)}
@@ -239,7 +237,7 @@ const BudgetPage = () => {
       {/* Botón flotante generar PDF */}
       <ShareButton
         onGeneratePDF={handleGeneratePDF}
-        disabled={isGeneratingPDF || totalSelected === 0}
+        disabled={isGeneratingPDF}
       />
     </div>
   );

@@ -51,6 +51,15 @@ const AddMaterialModal = ({ isOpen, onClose, onAddMaterial }) => {
     }
   };
 
+  // Función para resetear el formulario
+  const resetForm = () => {
+    setFormData({
+      name: '',
+      section: '',
+      category: categories[0]
+    });
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     
@@ -70,23 +79,12 @@ const AddMaterialModal = ({ isOpen, onClose, onAddMaterial }) => {
     };
 
     onAddMaterial(newMaterial);
-    
-    // Resetear formulario
-    setFormData({
-      name: '',
-      section: '',
-      category: categories[0]
-    });
-    
+    resetForm();
     onClose();
   };
 
   const handleClose = () => {
-    setFormData({
-      name: '',
-      section: '',
-      category: categories[0]
-    });
+    resetForm();
     onClose();
   };
 

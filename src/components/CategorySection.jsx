@@ -75,7 +75,7 @@ const CategorySection = ({ category, materials, quantities, onQuantityChange }) 
       {isExpanded && (
         <div>
           {Object.keys(materialsBySection).length > 0 ? (
-            Object.entries(materialsBySection).map(([section, sectionMaterials], sectionIndex) => {
+            Object.entries(materialsBySection).map(([section, sectionMaterials]) => {
               const isSectionExpanded = expandedSections[section] || false;
               const sectionSelected = sectionMaterials.reduce((total, material) => {
                 return total + (quantities[material.id] || 0);
