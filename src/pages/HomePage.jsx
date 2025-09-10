@@ -82,13 +82,13 @@ const HomePage = () => {
           <div className="flex items-center justify-between">
             <div></div>
             
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center w-64">
               <img
                 src={logo}
                 alt="AFS Logo"
-                className="h-12 w-12 object-contain"
+                className="h-16 w-16 object-contain flex-shrink-0 mr-3"
               />
-              <h1 className="text-xl font-bold text-gray-900">
+              <h1 className="text-lg font-bold text-gray-900">
                 Gestión de obras
               </h1>
             </div>

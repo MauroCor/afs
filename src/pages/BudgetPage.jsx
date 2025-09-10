@@ -140,34 +140,28 @@ const BudgetPage = () => {
       <div className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-mobile mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            {/* Botón Volver */}
+            <div></div>
+            
+            {/* Logo con título centrado - clickeable */}
             <button
               onClick={() => navigate('/')}
-              className="flex items-center space-x-1 text-gray-600 hover:text-gray-800 transition-colors duration-200"
+              className="flex items-center hover:opacity-80 transition-opacity duration-200 w-64"
               title="Volver al inicio"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-              <span className="text-sm font-medium">Volver</span>
-            </button>
-            
-            {/* Logo con título centrado */}
-            <div className="flex items-center space-x-3">
               <img
                 src={logo}
                 alt="AFS Logo"
-                className="h-12 w-12 object-contain"
+                className="h-16 w-16 object-contain flex-shrink-0 mr-3"
               />
-              <h1 className="text-xl font-bold text-gray-900">
+              <h1 className="text-lg font-bold text-gray-900">
                 Instalaciones
               </h1>
-            </div>
+            </button>
             
             {/* Botón de Cerrar Sesión */}
             <button
               onClick={handleLogout}
-              className="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xs font-medium transition duration-200"
+              className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm font-medium transition duration-200"
               title="Cerrar sesión"
             >
               Salir
