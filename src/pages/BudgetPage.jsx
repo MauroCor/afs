@@ -6,6 +6,7 @@ import CategorySection from '../components/CategorySection';
 import AddMaterialModal from '../components/AddMaterialModal';
 import ShareButton from '../components/ShareButton';
 import LoginPage from '../components/LoginPage';
+import Footer from '../components/Footer';
 import logo from '../images/logo.png';
 
 const BudgetPage = () => {
@@ -149,7 +150,7 @@ const BudgetPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Header */}
       <div className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-mobile mx-auto px-4 py-4">
@@ -269,6 +270,9 @@ const BudgetPage = () => {
         onGeneratePDF={handleGeneratePDF}
         disabled={isGeneratingPDF}
       />
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 };

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LoginPage from '../components/LoginPage';
+import Footer from '../components/Footer';
 import logo from '../images/logo.png';
 
 const HomePage = () => {
@@ -36,16 +37,16 @@ const HomePage = () => {
     {
       id: 'instalaciones',
       title: 'Instalaciones',
-      description: 'Gestionar materiales para instalaciones',
+      description: 'Planilla de materiales',
       icon: '🔧',
       color: 'bg-blue-500',
       hoverColor: 'hover:bg-blue-600'
     },
     {
       id: 'presupuesto',
-      title: 'Presupuesto',
-      description: 'Crear y gestionar presupuestos',
-      icon: '💰',
+      title: 'Presupuestos',
+      description: 'Crear presupuestos',
+      icon: '🧾',
       color: 'bg-green-500',
       hoverColor: 'hover:bg-green-600'
     },
@@ -53,7 +54,7 @@ const HomePage = () => {
       id: 'entregas',
       title: 'Entregas',
       description: 'Control de cobranzas',
-      icon: '📦',
+      icon: '💰',
       color: 'bg-orange-500',
       hoverColor: 'hover:bg-orange-600'
     }
@@ -83,7 +84,7 @@ const HomePage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Header */}
       <div className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-mobile mx-auto px-4 py-4">
@@ -95,7 +96,7 @@ const HomePage = () => {
                 className="h-12 w-12 object-contain"
               />
               <h1 className="text-xl font-bold text-gray-900">
-                Sistema de Gestión
+                Gestión de obras
               </h1>
             </div>
             
@@ -149,6 +150,9 @@ const HomePage = () => {
           ))}
         </div>
       </div>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 };
