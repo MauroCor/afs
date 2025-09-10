@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { initialMaterials, categories } from '../data/materials';
 import { generateAndSharePDF } from '../utils/pdfGenerator';
 import CategorySection from '../components/CategorySection';
@@ -8,6 +9,7 @@ import LoginPage from '../components/LoginPage';
 import logo from '../images/logo.png';
 
 const BudgetPage = () => {
+  const navigate = useNavigate();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [materials, setMaterials] = useState(initialMaterials);
   const [quantities, setQuantities] = useState(() => {
@@ -17,6 +19,7 @@ const BudgetPage = () => {
     });
     return initialQuantities;
   });
+  const [brands, setBrands] = useState({});
   const [obraName, setObraName] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
@@ -55,6 +58,14 @@ const BudgetPage = () => {
     return initialQuantities;
   };
 
+  // Función para manejar cambio de marca
+  const handleBrandChange = (category, brand) => {
+    setBrands(prev => ({
+      ...prev,
+      [category]: brand
+    }));
+  };
+
   // Función para cerrar sesión
   const handleLogout = () => {
     if (window.confirm('¿Estás seguro de que quieres cerrar sesión?')) {
@@ -70,11 +81,15 @@ const BudgetPage = () => {
       // Intentar cargar desde localStorage
       const savedMaterials = localStorage.getItem('afs-materials');
       const savedQuantities = localStorage.getItem('afs-quantities');
+      const savedBrands = localStorage.getItem('afs-brands');
       const savedObraName = localStorage.getItem('afs-obra-name');
 
       if (savedMaterials && savedQuantities) {
         setMaterials(JSON.parse(savedMaterials));
         setQuantities(JSON.parse(savedQuantities));
+      }
+      if (savedBrands) {
+        setBrands(JSON.parse(savedBrands));
       }
       if (savedObraName) {
         setObraName(savedObraName);
@@ -90,11 +105,12 @@ const BudgetPage = () => {
     try {
       localStorage.setItem('afs-materials', JSON.stringify(materials));
       localStorage.setItem('afs-quantities', JSON.stringify(quantities));
+      localStorage.setItem('afs-brands', JSON.stringify(brands));
       localStorage.setItem('afs-obra-name', obraName);
     } catch (error) {
       console.error('Error al guardar datos:', error);
     }
-  }, [materials, quantities, obraName]);
+  }, [materials, quantities, brands, obraName]);
 
   // Guardar datos cuando cambien
   useEffect(() => {
@@ -117,7 +133,7 @@ const BudgetPage = () => {
     setIsGeneratingPDF(true);
     
     try {
-      await generateAndSharePDF(materials, quantities, obraName);
+      await generateAndSharePDF(materials, quantities, obraName, brands);
     } catch (error) {
       console.error('Error al generar PDF:', error);
       alert('Error al generar el PDF. Por favor, intenta nuevamente.');
@@ -138,16 +154,29 @@ const BudgetPage = () => {
       <div className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-mobile mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            {/* Logo y título en la misma línea */}
+            {/* Botón Volver y Logo con título */}
             <div className="flex items-center space-x-3">
-              <img
-                src={logo}
-                alt="AFS Logo"
-                className="h-12 w-12 object-contain"
-              />
-              <h1 className="text-xl font-bold text-gray-900">
-                Materiales
-              </h1>
+              <button
+                onClick={() => navigate('/home')}
+                className="flex items-center space-x-1 text-gray-600 hover:text-gray-800 transition-colors duration-200"
+                title="Volver al inicio"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                <span className="text-sm font-medium">Volver</span>
+              </button>
+              
+              <div className="flex items-center space-x-3">
+                <img
+                  src={logo}
+                  alt="AFS Logo"
+                  className="h-12 w-12 object-contain"
+                />
+                <h1 className="text-xl font-bold text-gray-900">
+                  Instalaciones
+                </h1>
+              </div>
             </div>
             
             {/* Botón de Cerrar Sesión */}
@@ -196,6 +225,7 @@ const BudgetPage = () => {
               materials={materials}
               quantities={quantities}
               onQuantityChange={handleQuantityChange}
+              onBrandChange={handleBrandChange}
             />
           ))}
         </div>

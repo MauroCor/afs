@@ -1,20 +1,29 @@
 import React, { useState } from 'react';
 import MaterialRow from './MaterialRow';
 
-const CategorySection = ({ category, materials, quantities, onQuantityChange }) => {
+const CategorySection = ({ category, materials, quantities, onQuantityChange, onBrandChange }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [expandedSections, setExpandedSections] = useState({});
+  const [brand, setBrand] = useState('');
   
   // Filtrar materiales de esta categoría
   const categoryMaterials = materials.filter(material => material.category === category);
   
   // Agrupar materiales por sección
   const materialsBySection = categoryMaterials.reduce((acc, material) => {
-    const section = material.section || 'Sin sección';
-    if (!acc[section]) {
-      acc[section] = [];
+    // Para "Otros Materiales", no agrupar por sección si está vacía
+    if (category === 'Otros Materiales' && (!material.section || material.section.trim() === '')) {
+      if (!acc['']) {
+        acc[''] = [];
+      }
+      acc[''].push(material);
+    } else {
+      const section = material.section || 'Sin sección';
+      if (!acc[section]) {
+        acc[section] = [];
+      }
+      acc[section].push(material);
     }
-    acc[section].push(material);
     return acc;
   }, {});
   
@@ -29,6 +38,15 @@ const CategorySection = ({ category, materials, quantities, onQuantityChange }) 
       ...prev,
       [sectionName]: !prev[sectionName]
     }));
+  };
+
+  // Función para manejar cambio de marca
+  const handleBrandChange = (e) => {
+    const newBrand = e.target.value;
+    setBrand(newBrand);
+    if (onBrandChange) {
+      onBrandChange(category, newBrand);
+    }
   };
 
   return (
@@ -71,6 +89,25 @@ const CategorySection = ({ category, materials, quantities, onQuantityChange }) 
         </div>
       </button>
 
+      {/* Input de marca - solo para categorías que no sean "Otros Materiales" */}
+      {isExpanded && category !== 'Otros Materiales' && (
+        <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
+          <div className="flex items-center space-x-3">
+            <label htmlFor={`brand-${category}`} className="text-sm font-medium text-gray-700 whitespace-nowrap">
+              Marca:
+            </label>
+            <input
+              type="text"
+              id={`brand-${category}`}
+              value={brand}
+              onChange={handleBrandChange}
+              className="flex-1 text-sm bg-white border border-gray-300 rounded-md px-3 py-2 focus:border-afs-blue focus:outline-none"
+              placeholder="Ingrese marca"
+            />
+          </div>
+        </div>
+      )}
+
       {/* Lista de materiales agrupados por sección */}
       {isExpanded && (
         <div>
@@ -80,6 +117,22 @@ const CategorySection = ({ category, materials, quantities, onQuantityChange }) 
               const sectionSelected = sectionMaterials.reduce((total, material) => {
                 return total + (quantities[material.id] || 0);
               }, 0);
+              
+              // Para "Otros Materiales" con sección vacía, mostrar materiales directamente sin header de sección
+              if (category === 'Otros Materiales' && (!section || section.trim() === '')) {
+                return (
+                  <div key={section} className="divide-y divide-gray-200">
+                    {sectionMaterials.map(material => (
+                      <MaterialRow
+                        key={material.id}
+                        material={material}
+                        quantity={quantities[material.id] || 0}
+                        onQuantityChange={onQuantityChange}
+                      />
+                    ))}
+                  </div>
+                );
+              }
               
               return (
                 <div key={section}>

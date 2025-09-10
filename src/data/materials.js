@@ -277,5 +277,6 @@ export const initialMaterials = [
 export const categories = [
   "FUSION GAS",
   "FUSION AGUA", 
-  "CLOACA CON ORING"
+  "CLOACA CON ORING",
+  "OTROS MATERIALES"
 ];

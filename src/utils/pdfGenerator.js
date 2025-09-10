@@ -190,12 +190,13 @@ const groupMaterialsByCategory = (materials, quantities) => {
  * @param {string} category - Nombre de la categoría
  * @param {Array} materials - Lista de materiales de la categoría
  * @param {number} startY - Posición Y inicial
+ * @param {string} brand - Marca de la categoría (opcional)
  * @returns {number} Posición Y final
  */
-const createCategoryTable = (doc, category, materials, startY) => {
+const createCategoryTable = (doc, category, materials, startY, brand = '') => {
   const { margins, pageWidth, colors, fonts } = PDF_CONFIG;
   const tableWidth = pageWidth - margins.left - margins.right;
-  const colWidths = [tableWidth * 0.25, tableWidth * 0.55, tableWidth * 0.2]; // Sección, Detalle, Cantidad
+  const colWidths = [tableWidth * 0.2, tableWidth * 0.8]; // Cantidad, Detalle
   const rowHeight = 8;
   const headerHeight = 10;
   
@@ -208,7 +209,10 @@ const createCategoryTable = (doc, category, materials, startY) => {
   doc.setFontSize(fonts.category.size);
   doc.setTextColor(colors.black[0], colors.black[1], colors.black[2]);
   doc.setFont('helvetica', fonts.category.weight);
-  doc.text(category, margins.left + tableWidth/2, currentY + 6, { align: 'center' });
+  
+  // Mostrar categoría con marca si existe
+  const categoryTitle = brand ? `${category} - ${brand}` : category;
+  doc.text(categoryTitle, margins.left + tableWidth/2, currentY + 6, { align: 'center' });
   
   currentY += headerHeight + 2;
   
@@ -221,11 +225,9 @@ const createCategoryTable = (doc, category, materials, startY) => {
   doc.setFont('helvetica', fonts.tableHeader.weight);
   
   let xPos = margins.left + 5;
-  doc.text('Sección', xPos, currentY + 5);
+  doc.text('Cantidad', xPos, currentY + 5);
   xPos += colWidths[0];
   doc.text('Detalle', xPos, currentY + 5);
-  xPos += colWidths[1];
-  doc.text('Cantidad', xPos, currentY + 5);
   
   currentY += rowHeight;
   
@@ -248,16 +250,13 @@ const createCategoryTable = (doc, category, materials, startY) => {
     doc.setFont('helvetica', fonts.tableContent.weight);
     
     xPos = margins.left + 5;
-    // Sección
-    doc.text(material.section, xPos, currentY + 5);
+    // Cantidad
+    doc.text(material.quantity.toString(), xPos, currentY + 5);
     xPos += colWidths[0];
     // Detalle (nombre del material) - manejar nombres largos con ajuste automático
     const maxWidth = colWidths[1] - 10;
     const materialName = doc.splitTextToSize(material.name, maxWidth);
     doc.text(materialName, xPos, currentY + 5);
-    xPos += colWidths[1];
-    // Cantidad
-    doc.text(material.quantity.toString(), xPos, currentY + 5);
     
     currentY += rowHeight;
   });
@@ -285,7 +284,7 @@ const createFooter = (doc) => {
     doc.setFontSize(fonts.footer.size);
     doc.setTextColor(colors.mediumGray[0], colors.mediumGray[1], colors.mediumGray[2]);
     doc.setFont('helvetica', fonts.footer.weight);
-    doc.text('AFS - Materiales para obra', margins.left, pageHeight - margins.bottom - 5);
+    doc.text('AFS Instalaciones', margins.left, pageHeight - margins.bottom - 5);
     doc.text(`Página ${i} de ${pageCount}`, pageWidth - margins.right - 20, pageHeight - margins.bottom - 5, { align: 'right' });
   }
 };
@@ -295,9 +294,10 @@ const createFooter = (doc) => {
  * @param {Array} materials - Lista de materiales
  * @param {Object} quantities - Cantidades seleccionadas
  * @param {string} obraName - Nombre de la obra
+ * @param {Object} brands - Marcas por categoría
  * @returns {jsPDF} Documento PDF generado
  */
-export const generatePDF = (materials = [], quantities = {}, obraName = '') => {
+export const generatePDF = (materials = [], quantities = {}, obraName = '', brands = {}) => {
   // Crear nuevo documento PDF A4
   const doc = new jsPDF({
     orientation: 'portrait',
@@ -316,7 +316,8 @@ export const generatePDF = (materials = [], quantities = {}, obraName = '') => {
   // Crear tabla para cada categoría
   Object.keys(materialsByCategory).forEach(category => {
     const categoryMaterials = materialsByCategory[category];
-    currentY = createCategoryTable(doc, category, categoryMaterials, currentY);
+    const brand = brands[category] || '';
+    currentY = createCategoryTable(doc, category, categoryMaterials, currentY, brand);
   });
   
   // Si no hay materiales seleccionados
@@ -358,16 +359,18 @@ const supportsFileConstructor = () => {
  * @param {Array} materials - Lista de materiales
  * @param {Object} quantities - Cantidades seleccionadas
  * @param {string} obraName - Nombre de la obra
+ * @param {Object} brands - Marcas por categoría
  * @returns {Promise<void>}
  */
-export const generateAndSharePDF = async (materials = [], quantities = {}, obraName = '') => {
+export const generateAndSharePDF = async (materials = [], quantities = {}, obraName = '', brands = {}) => {
   try {
     // Validar parámetros
     const safeMaterials = Array.isArray(materials) ? materials : [];
     const safeQuantities = typeof quantities === 'object' && quantities !== null ? quantities : {};
     const safeObraName = typeof obraName === 'string' ? obraName : '';
+    const safeBrands = typeof brands === 'object' && brands !== null ? brands : {};
     
-    const doc = generatePDF(safeMaterials, safeQuantities, safeObraName);
+    const doc = generatePDF(safeMaterials, safeQuantities, safeObraName, safeBrands);
     
     // Convertir a blob de forma segura
     let pdfBlob;
@@ -414,7 +417,7 @@ export const generateAndSharePDF = async (materials = [], quantities = {}, obraN
     
     // Intentar descarga de emergencia
     try {
-      const doc = generatePDF(materials, quantities, obraName);
+      const doc = generatePDF(materials, quantities, obraName, brands);
       downloadPDF(doc, obraName);
     } catch (fallbackError) {
       alert('Error crítico. Por favor, recarga la página e intenta nuevamente.');
