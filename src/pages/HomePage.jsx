@@ -52,7 +52,7 @@ const HomePage = () => {
     {
       id: 'entregas',
       title: 'Entregas',
-      description: 'Control de entregas y pedidos',
+      description: 'Control de cobranzas',
       icon: '📦',
       color: 'bg-orange-500',
       hoverColor: 'hover:bg-orange-600'
