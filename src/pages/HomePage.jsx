@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import LoginPage from '../components/LoginPage';
 import Footer from '../components/Footer';
 import logo from '../images/logo.png';
 
@@ -10,21 +9,13 @@ const HomePage = () => {
 
   // Verificar autenticación al montar el componente
   useEffect(() => {
-    checkAuthentication();
-  }, []);
-
-  // Verificar si el usuario está autenticado
-  const checkAuthentication = () => {
     const auth = localStorage.getItem('afs_authenticated');
     if (auth === 'true') {
       setIsAuthenticated(true);
+    } else {
+      navigate('/login', { replace: true });
     }
-  };
-
-  // Función para manejar el login
-  const handleLogin = () => {
-    setIsAuthenticated(true);
-  };
+  }, [navigate]);
 
   const handleLogout = () => {
     if (window.confirm('¿Estás seguro de que quieres cerrar sesión?')) {
@@ -78,9 +69,9 @@ const HomePage = () => {
     }
   };
 
-  // Si no está autenticado, mostrar login
+  // No renderizar si no está autenticado
   if (!isAuthenticated) {
-    return <LoginPage onLogin={handleLogin} />;
+    return null;
   }
 
   return (
@@ -89,6 +80,8 @@ const HomePage = () => {
       <div className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-mobile mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
+            <div></div>
+            
             <div className="flex items-center space-x-3">
               <img
                 src={logo}

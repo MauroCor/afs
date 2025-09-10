@@ -5,7 +5,6 @@ import { generateAndSharePDF } from '../utils/pdfGenerator';
 import CategorySection from '../components/CategorySection';
 import AddMaterialModal from '../components/AddMaterialModal';
 import ShareButton from '../components/ShareButton';
-import LoginPage from '../components/LoginPage';
 import Footer from '../components/Footer';
 import logo from '../images/logo.png';
 
@@ -27,28 +26,14 @@ const BudgetPage = () => {
 
   // Verificar autenticación al montar el componente
   useEffect(() => {
-    checkAuthentication();
-  }, []);
-
-  // Cargar datos cuando se autentica
-  useEffect(() => {
-    if (isAuthenticated) {
-      loadData();
-    }
-  }, [isAuthenticated]);
-
-  // Verificar si el usuario está autenticado
-  const checkAuthentication = () => {
     const auth = localStorage.getItem('afs_authenticated');
     if (auth === 'true') {
       setIsAuthenticated(true);
+      loadData();
+    } else {
+      navigate('/login', { replace: true });
     }
-  };
-
-  // Función para manejar el login
-  const handleLogin = () => {
-    setIsAuthenticated(true);
-  };
+  }, [navigate]);
 
   // Función para resetear quantities
   const resetQuantities = () => {
@@ -144,9 +129,9 @@ const BudgetPage = () => {
   };
 
 
-  // Si no está autenticado, mostrar login
+  // No renderizar si no está autenticado
   if (!isAuthenticated) {
-    return <LoginPage onLogin={handleLogin} />;
+    return null;
   }
 
   return (
@@ -155,29 +140,28 @@ const BudgetPage = () => {
       <div className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-mobile mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            {/* Botón Volver y Logo con título */}
+            {/* Botón Volver */}
+            <button
+              onClick={() => navigate('/')}
+              className="flex items-center space-x-1 text-gray-600 hover:text-gray-800 transition-colors duration-200"
+              title="Volver al inicio"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              <span className="text-sm font-medium">Volver</span>
+            </button>
+            
+            {/* Logo con título centrado */}
             <div className="flex items-center space-x-3">
-              <button
-                onClick={() => navigate('/home')}
-                className="flex items-center space-x-1 text-gray-600 hover:text-gray-800 transition-colors duration-200"
-                title="Volver al inicio"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-                <span className="text-sm font-medium">Volver</span>
-              </button>
-              
-              <div className="flex items-center space-x-3">
-                <img
-                  src={logo}
-                  alt="AFS Logo"
-                  className="h-12 w-12 object-contain"
-                />
-                <h1 className="text-xl font-bold text-gray-900">
-                  Instalaciones
-                </h1>
-              </div>
+              <img
+                src={logo}
+                alt="AFS Logo"
+                className="h-12 w-12 object-contain"
+              />
+              <h1 className="text-xl font-bold text-gray-900">
+                Instalaciones
+              </h1>
             </div>
             
             {/* Botón de Cerrar Sesión */}
