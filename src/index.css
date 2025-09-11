@@ -18,7 +18,7 @@
   }
   
   .btn-quantity {
-    @apply w-12 h-12 rounded-full bg-afs-blue text-white font-bold text-lg hover:bg-afs-blue-dark transition-colors duration-200 flex items-center justify-center;
+    @apply w-8 h-8 rounded-full bg-afs-blue text-white font-bold text-sm hover:bg-afs-blue-dark transition-colors duration-200 flex items-center justify-center;
   }
   
   .input-field {

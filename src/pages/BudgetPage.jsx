@@ -58,6 +58,7 @@ const BudgetPage = () => {
       setIsAuthenticated(false);
       setQuantities(resetQuantities());
       setObraName('');
+      navigate('/login', { replace: true });
     }
   };
 
@@ -170,7 +171,7 @@ const BudgetPage = () => {
       </div>
 
       {/* Contenido principal */}
-      <div className="max-w-mobile mx-auto px-4 py-6">
+      <div className="w-full max-w-[400px] mx-auto px-4 py-6">
         {/* Campo nombre de obra */}
         <div className="mb-4">
           <input
@@ -182,20 +183,9 @@ const BudgetPage = () => {
           />
         </div>
 
-        <div className="mb-6">
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="w-full btn-primary flex items-center justify-center space-x-2"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-            </svg>
-            <span>Agregar material</span>
-          </button>
-        </div>
 
         {/* Lista de categorías */}
-        <div className="space-y-4">
+        <div className="space-y-4 w-full min-w-0">
           {categories.map(category => (
             <CategorySection
               key={category}
@@ -204,6 +194,7 @@ const BudgetPage = () => {
               quantities={quantities}
               onQuantityChange={handleQuantityChange}
               onBrandChange={handleBrandChange}
+              onAddMaterial={category === 'OTROS MATERIALES' ? () => setIsModalOpen(true) : null}
             />
           ))}
           

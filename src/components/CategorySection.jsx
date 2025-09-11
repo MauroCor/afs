@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import MaterialRow from './MaterialRow';
 
-const CategorySection = ({ category, materials, quantities, onQuantityChange, onBrandChange }) => {
+const CategorySection = ({ category, materials, quantities, onQuantityChange, onBrandChange, onAddMaterial }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [expandedSections, setExpandedSections] = useState({});
   const [brand, setBrand] = useState('');
@@ -11,8 +11,8 @@ const CategorySection = ({ category, materials, quantities, onQuantityChange, on
   
   // Agrupar materiales por sección
   const materialsBySection = categoryMaterials.reduce((acc, material) => {
-    // Para "Otros Materiales", no agrupar por sección si está vacía
-    if (category === 'Otros Materiales' && (!material.section || material.section.trim() === '')) {
+    // Para "OTROS MATERIALES", no agrupar por sección si está vacía
+    if (category === 'OTROS MATERIALES' && (!material.section || material.section.trim() === '')) {
       if (!acc['']) {
         acc[''] = [];
       }
@@ -50,7 +50,7 @@ const CategorySection = ({ category, materials, quantities, onQuantityChange, on
   };
 
   return (
-    <div className="mb-4 bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+    <div className="mb-4 bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden w-full">
       {/* Header de la categoría */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
@@ -86,10 +86,10 @@ const CategorySection = ({ category, materials, quantities, onQuantityChange, on
         </div>
       </button>
 
-      {/* Input de marca - solo para categorías que no sean "Otros Materiales" */}
-      {isExpanded && category !== 'Otros Materiales' && (
+      {/* Input de marca - solo para categorías que no sean "OTROS MATERIALES" */}
+      {isExpanded && category !== 'OTROS MATERIALES' && (
         <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-3 w-full">
             <label htmlFor={`brand-${category}`} className="text-sm font-medium text-gray-700 whitespace-nowrap">
               Marca:
             </label>
@@ -98,7 +98,7 @@ const CategorySection = ({ category, materials, quantities, onQuantityChange, on
               id={`brand-${category}`}
               value={brand}
               onChange={handleBrandChange}
-              className="flex-1 text-sm bg-white border border-gray-300 rounded-md px-3 py-2 focus:border-afs-blue focus:outline-none"
+              className="w-48 text-sm bg-white border border-gray-300 rounded-md px-3 py-2 focus:border-afs-blue focus:outline-none"
               placeholder="Ingrese marca"
             />
           </div>
@@ -108,6 +108,18 @@ const CategorySection = ({ category, materials, quantities, onQuantityChange, on
       {/* Lista de materiales agrupados por sección */}
       {isExpanded && (
         <div>
+          {/* Botón agregar material - solo para "OTROS MATERIALES" */}
+          {category === 'OTROS MATERIALES' && onAddMaterial && (
+            <div className="px-4 py-3 bg-white flex justify-center border-b border-gray-200">
+              <button
+                onClick={onAddMaterial}
+                className="btn-primary flex items-center justify-center space-x-1 text-sm py-2 px-4"
+              >
+                <span className="text-lg">+</span>
+                <span>Agregar</span>
+              </button>
+            </div>
+          )}
           {Object.keys(materialsBySection).length > 0 ? (
             Object.entries(materialsBySection).map(([section, sectionMaterials]) => {
               const isSectionExpanded = expandedSections[section] || false;
@@ -115,8 +127,8 @@ const CategorySection = ({ category, materials, quantities, onQuantityChange, on
                 return total + (quantities[material.id] || 0);
               }, 0);
               
-              // Para "Otros Materiales" con sección vacía, mostrar materiales directamente sin header de sección
-              if (category === 'Otros Materiales' && (!section || section.trim() === '')) {
+              // Para "OTROS MATERIALES" con sección vacía, mostrar materiales directamente sin header de sección
+              if (category === 'OTROS MATERIALES' && (!section || section.trim() === '')) {
                 return (
                   <div key={section} className="divide-y divide-gray-200">
                     {sectionMaterials.map(material => (

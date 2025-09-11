@@ -36,7 +36,7 @@ const AddMaterialModal = ({ isOpen, onClose, onAddMaterial }) => {
       id: newId,
       name: formData.name.trim(),
       section: '',
-      category: 'Otros Materiales'
+      category: 'OTROS MATERIALES'
     };
 
     onAddMaterial(newMaterial);
@@ -123,7 +123,7 @@ const AddMaterialModal = ({ isOpen, onClose, onAddMaterial }) => {
           {/* Información */}
           <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded">
             <p className="text-sm">
-              El material se agregará automáticamente a la categoría "Otros Materiales"
+              El material se agregará automáticamente a la categoría "OTROS MATERIALES"
             </p>
           </div>
 
