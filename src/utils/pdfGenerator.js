@@ -148,7 +148,7 @@ const createHeader = (doc, obraName) => {
     doc.setFontSize(11);
     doc.setTextColor(PDF_CONFIG.colors.black[0], PDF_CONFIG.colors.black[1], PDF_CONFIG.colors.black[2]);
     doc.setFont('helvetica', 'normal'); // Sin negrita, más discreto
-    doc.text(obraName, pageWidth - margins.right - 5, contentY, { align: 'right' });
+    doc.text(obraName.toUpperCase(), pageWidth - margins.right - 5, contentY, { align: 'right' });
   } else {
     // Si no hay nombre de obra, usar "" como fallback
     doc.setFontSize(11);
@@ -383,7 +383,7 @@ export const generateAndSharePDF = async (materials = [], quantities = {}, obraN
     // Intentar compartir con Web Share API si está disponible
     if (supportsWebShare() && supportsFileConstructor()) {
       try {
-        const fileName = `materiales-${safeObraName || 'obra'}-${new Date().toISOString().split('T')[0]}.pdf`;
+        const fileName = `AFS-${safeObraName || 'obra'}-${new Date().toISOString().split('T')[0]}.pdf`;
         const file = new File([pdfBlob], fileName, { type: 'application/pdf' });
         
         // Verificar si se puede compartir este archivo
@@ -445,7 +445,7 @@ const downloadPDF = (doc, obraName = '') => {
     
     // Crear nombre de archivo seguro
     const safeObraName = (obraName || 'obra').replace(/[^a-zA-Z0-9-_]/g, '_');
-    const fileName = `materiales-${safeObraName}-${new Date().toISOString().split('T')[0]}.pdf`;
+    const fileName = `AFS-${safeObraName}-${new Date().toISOString().split('T')[0]}.pdf`;
     
     // Crear enlace de descarga
     const link = document.createElement('a');
