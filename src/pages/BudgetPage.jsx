@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { initialMaterials, categories } from '../data/materials';
 import { generateAndSharePDF } from '../utils/pdfGenerator';
@@ -28,7 +28,6 @@ const BudgetPage = () => {
     const auth = localStorage.getItem('afs_authenticated');
     if (auth === 'true') {
       setIsAuthenticated(true);
-      loadData();
     } else {
       navigate('/login', { replace: true });
     }
@@ -62,46 +61,6 @@ const BudgetPage = () => {
     }
   };
 
-  const loadData = () => {
-    try {
-      // Intentar cargar desde localStorage
-      const savedMaterials = localStorage.getItem('afs-materials');
-      const savedQuantities = localStorage.getItem('afs-quantities');
-      const savedBrands = localStorage.getItem('afs-brands');
-      const savedObraName = localStorage.getItem('afs-obra-name');
-
-      if (savedMaterials && savedQuantities) {
-        setMaterials(JSON.parse(savedMaterials));
-        setQuantities(JSON.parse(savedQuantities));
-      }
-      if (savedBrands) {
-        setBrands(JSON.parse(savedBrands));
-      }
-      if (savedObraName) {
-        setObraName(savedObraName);
-      }
-      // Si no hay datos guardados, usar los valores iniciales que ya están configurados
-    } catch (error) {
-      console.error('Error al cargar datos:', error);
-      // Los valores iniciales ya están configurados en useState
-    }
-  };
-
-  const saveData = useCallback(() => {
-    try {
-      localStorage.setItem('afs-materials', JSON.stringify(materials));
-      localStorage.setItem('afs-quantities', JSON.stringify(quantities));
-      localStorage.setItem('afs-brands', JSON.stringify(brands));
-      localStorage.setItem('afs-obra-name', obraName);
-    } catch (error) {
-      console.error('Error al guardar datos:', error);
-    }
-  }, [materials, quantities, brands, obraName]);
-
-  // Guardar datos cuando cambien
-  useEffect(() => {
-    saveData();
-  }, [saveData]);
 
   const handleQuantityChange = (materialId, newQuantity) => {
     setQuantities(prev => ({
