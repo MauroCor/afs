@@ -68,9 +68,6 @@ const CategorySection = ({ category, materials, quantities, onQuantityChange, on
         </div>
         
         <div className="flex items-center space-x-2">
-          <span className="text-sm text-gray-500">
-            {categoryMaterials.length} materiales
-          </span>
           <svg
             className={`w-5 h-5 text-gray-400 transition-transform duration-200 ${
               isExpanded ? 'rotate-180' : ''
