@@ -290,6 +290,54 @@ const createFooter = (doc) => {
 };
 
 /**
+ * Crea una sección de presupuesto en el PDF
+ * @param {jsPDF} doc - Documento PDF
+ * @param {string} budgetText - Texto del presupuesto
+ * @param {number} startY - Posición Y inicial
+ * @returns {number} Posición Y final
+ */
+const createBudgetSection = (doc, budgetText, startY) => {
+  const { margins, pageWidth, colors, fonts } = PDF_CONFIG;
+  const tableWidth = pageWidth - margins.left - margins.right;
+  const headerHeight = 10;
+  
+  let currentY = startY;
+  
+  // Encabezado "PRESUPUESTO" en negrita centrado
+  doc.setFillColor(colors.lightGray[0], colors.lightGray[1], colors.lightGray[2]);
+  doc.rect(margins.left, currentY, tableWidth, headerHeight, 'F');
+  
+  doc.setFontSize(fonts.category.size);
+  doc.setTextColor(colors.black[0], colors.black[1], colors.black[2]);
+  doc.setFont('helvetica', 'bold');
+  doc.text('PRESUPUESTO', margins.left + tableWidth/2, currentY + 6, { align: 'center' });
+  
+  currentY += headerHeight + 10;
+  
+  // Contenido del presupuesto
+  doc.setFontSize(fonts.tableContent.size);
+  doc.setTextColor(colors.black[0], colors.black[1], colors.black[2]);
+  doc.setFont('helvetica', 'normal');
+  
+  // Dividir el texto en líneas que quepan en el ancho de la página
+  const maxWidth = tableWidth - 10;
+  const budgetLines = doc.splitTextToSize(budgetText, maxWidth);
+  
+  budgetLines.forEach(line => {
+    // Verificar espacio en página
+    if (currentY + 5 > PDF_CONFIG.pageHeight - PDF_CONFIG.margins.bottom - 20) {
+      doc.addPage();
+      currentY = PDF_CONFIG.margins.top;
+    }
+    
+    doc.text(line, margins.left + 5, currentY);
+    currentY += 5;
+  });
+  
+  return currentY + 10; // Espacio después del presupuesto
+};
+
+/**
  * Genera un PDF profesional con los materiales especificados
  * @param {Array} materials - Lista de materiales
  * @param {Object} quantities - Cantidades seleccionadas
@@ -332,6 +380,156 @@ export const generatePDF = (materials = [], quantities = {}, obraName = '', bran
   createFooter(doc);
   
   return doc;
+};
+
+/**
+ * Genera un PDF de presupuesto con el nombre del cliente y texto libre
+ * @param {string} clientName - Nombre del cliente
+ * @param {string} budgetText - Texto del presupuesto
+ * @returns {jsPDF} Documento PDF generado
+ */
+export const generateBudgetPDF = (clientName = '', budgetText = '') => {
+  // Crear nuevo documento PDF A4
+  const doc = new jsPDF({
+    orientation: 'portrait',
+    unit: 'mm',
+    format: 'a4'
+  });
+  
+  // Crear encabezado usando el nombre del cliente como nombre de obra
+  createHeader(doc, clientName);
+  
+  // Crear sección de presupuesto
+  createBudgetSection(doc, budgetText, PDF_CONFIG.margins.top + 50);
+  
+  // Crear footer
+  createFooter(doc);
+  
+  return doc;
+};
+
+/**
+ * Genera y comparte un PDF de presupuesto (compatible con móvil)
+ * @param {string} clientName - Nombre del cliente
+ * @param {string} budgetText - Texto del presupuesto
+ * @returns {Promise<void>}
+ */
+export const generateAndShareBudgetPDF = async (clientName = '', budgetText = '') => {
+  try {
+    // Validar parámetros
+    const safeClientName = typeof clientName === 'string' ? clientName : '';
+    const safeBudgetText = typeof budgetText === 'string' ? budgetText : '';
+    
+    const doc = generateBudgetPDF(safeClientName, safeBudgetText);
+    
+    // Convertir a blob de forma segura
+    let pdfBlob;
+    try {
+      pdfBlob = doc.output('blob');
+    } catch (blobError) {
+      throw new Error('No se pudo crear el archivo PDF');
+    }
+    
+    // Intentar compartir con Web Share API si está disponible
+    if (supportsWebShare() && supportsFileConstructor()) {
+      try {
+        const fileName = `AFS-${formatObraNameForFile(safeClientName)}-${new Date().toISOString().split('T')[0]}.pdf`;
+        const file = new File([pdfBlob], fileName, { type: 'application/pdf' });
+        
+        // Verificar si se puede compartir este archivo
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            title: 'AFS Presupuesto',
+            text: `Presupuesto para ${safeClientName || 'el cliente'}`,
+            files: [file]
+          });
+          return;
+        }
+      } catch (shareError) {
+        // Continuar con fallback
+      }
+    }
+    
+    // Fallback: descargar el archivo
+    downloadBudgetPDF(doc, safeClientName);
+    
+  } catch (error) {
+    // Mostrar error más específico
+    let errorMessage = 'Error al generar el PDF. Por favor, intenta nuevamente.';
+    
+    if (error.message.includes('blob')) {
+      errorMessage = 'Error al crear el archivo PDF. Tu navegador podría no ser compatible.';
+    } else if (error.message.includes('share')) {
+      errorMessage = 'Error al compartir el PDF. Se descargará automáticamente.';
+    }
+    
+    alert(errorMessage);
+    
+    // Intentar descarga de emergencia
+    try {
+      const doc = generateBudgetPDF(clientName, budgetText);
+      downloadBudgetPDF(doc, clientName);
+    } catch (fallbackError) {
+      alert('Error crítico. Por favor, recarga la página e intenta nuevamente.');
+    }
+  }
+};
+
+/**
+ * Descarga el PDF de presupuesto generado (compatible con móviles)
+ * @param {jsPDF} doc - Documento PDF
+ * @param {string} clientName - Nombre del cliente
+ */
+const downloadBudgetPDF = (doc, clientName = '') => {
+  try {
+    // Generar blob de forma segura
+    let pdfBlob;
+    try {
+      pdfBlob = doc.output('blob');
+    } catch (blobError) {
+      throw new Error('No se pudo generar el archivo PDF');
+    }
+    
+    // Crear URL del blob
+    const url = URL.createObjectURL(pdfBlob);
+    
+    // Crear nombre de archivo seguro
+    const fileName = `AFS-${formatObraNameForFile(clientName)}-${new Date().toISOString().split('T')[0]}.pdf`;
+    
+    // Crear enlace de descarga
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    link.style.display = 'none';
+    
+    // Agregar al DOM temporalmente
+    document.body.appendChild(link);
+    
+    // Intentar descarga
+    try {
+      link.click();
+    } catch (clickError) {
+      // Fallback: abrir en nueva ventana
+      try {
+        window.open(url, '_blank');
+      } catch (openError) {
+        throw new Error('No se pudo descargar ni abrir el PDF');
+      }
+    }
+    
+    // Limpiar después de un tiempo
+    setTimeout(() => {
+      try {
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      } catch (cleanupError) {
+        // Limpieza silenciosa
+      }
+    }, 1000);
+    
+  } catch (error) {
+    throw error;
+  }
 };
 
 /**

@@ -57,8 +57,7 @@ const HomePage = () => {
         navigate('/instalaciones');
         break;
       case 'presupuesto':
-        // TODO: Implementar página de presupuesto
-        alert('Funcionalidad de presupuesto próximamente');
+        navigate('/presupuesto');
         break;
       case 'entregas':
         // TODO: Implementar página de entregas
