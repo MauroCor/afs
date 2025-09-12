@@ -138,9 +138,9 @@ const createHeader = (doc, obraName) => {
     day: '2-digit'
   });
   
-  doc.setFontSize(9);
+  doc.setFontSize(11);
   doc.setFont('helvetica', 'normal');
-  doc.setTextColor(PDF_CONFIG.colors.mediumGray[0], PDF_CONFIG.colors.mediumGray[1], PDF_CONFIG.colors.mediumGray[2]);
+  doc.setTextColor(PDF_CONFIG.colors.black[0], PDF_CONFIG.colors.black[1], PDF_CONFIG.colors.black[2]);
   doc.text(`Fecha: ${dateString}`, margins.left, contentY);
   
   // Nombre de la obra a la derecha, más discreto
@@ -335,6 +335,24 @@ export const generatePDF = (materials = [], quantities = {}, obraName = '', bran
 };
 
 /**
+ * Formatea el nombre de la obra para el archivo PDF
+ * @param {string} obraName - Nombre de la obra
+ * @returns {string} Nombre formateado
+ */
+const formatObraNameForFile = (obraName) => {
+  if (!obraName || typeof obraName !== 'string') {
+    return 'OBRA';
+  }
+  
+  return obraName
+    .toUpperCase()                    // Convertir a mayúsculas
+    .replace(/\s+/g, '-')            // Reemplazar espacios con guiones medios
+    .replace(/[^A-Z0-9-]/g, '')      // Remover caracteres especiales excepto guiones
+    .replace(/-+/g, '-')             // Reemplazar múltiples guiones con uno solo
+    .replace(/^-|-$/g, '');          // Remover guiones al inicio y final
+};
+
+/**
  * Verifica si el navegador soporta Web Share API
  * @returns {boolean}
  */
@@ -383,7 +401,7 @@ export const generateAndSharePDF = async (materials = [], quantities = {}, obraN
     // Intentar compartir con Web Share API si está disponible
     if (supportsWebShare() && supportsFileConstructor()) {
       try {
-        const fileName = `AFS-${safeObraName || 'obra'}-${new Date().toISOString().split('T')[0]}.pdf`;
+        const fileName = `AFS-${formatObraNameForFile(safeObraName)}-${new Date().toISOString().split('T')[0]}.pdf`;
         const file = new File([pdfBlob], fileName, { type: 'application/pdf' });
         
         // Verificar si se puede compartir este archivo
@@ -444,8 +462,7 @@ const downloadPDF = (doc, obraName = '') => {
     const url = URL.createObjectURL(pdfBlob);
     
     // Crear nombre de archivo seguro
-    const safeObraName = (obraName || 'obra').replace(/[^a-zA-Z0-9-_]/g, '_');
-    const fileName = `AFS-${safeObraName}-${new Date().toISOString().split('T')[0]}.pdf`;
+    const fileName = `AFS-${formatObraNameForFile(obraName)}-${new Date().toISOString().split('T')[0]}.pdf`;
     
     // Crear enlace de descarga
     const link = document.createElement('a');
