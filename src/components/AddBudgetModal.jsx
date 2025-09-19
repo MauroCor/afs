@@ -30,6 +30,13 @@ const AddBudgetModal = ({ isOpen, onClose, onAddWork, selectedCategory }) => {
     }
   }, [isOpen]);
 
+  const handleMontoChange = (e) => {
+    const value = e.target.value;
+    // Solo permitir números, punto y coma
+    const numericValue = value.replace(/[^0-9.,]/g, '');
+    setMonto(numericValue);
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     
@@ -38,7 +45,7 @@ const AddBudgetModal = ({ isOpen, onClose, onAddWork, selectedCategory }) => {
       return;
     }
 
-    const montoNumero = parseFloat(monto.replace(/[^0-9.-]/g, ''));
+    const montoNumero = parseFloat(monto.replace(',', '.'));
     if (isNaN(montoNumero) || montoNumero <= 0) {
       alert('Por favor ingrese un monto válido');
       return;
@@ -139,9 +146,11 @@ const AddBudgetModal = ({ isOpen, onClose, onAddWork, selectedCategory }) => {
               </label>
               <input
                 type="text"
+                inputMode="numeric"
+                pattern="[0-9.,]*"
                 id="monto"
                 value={monto}
-                onChange={(e) => setMonto(e.target.value)}
+                onChange={handleMontoChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="$..."
                 required
