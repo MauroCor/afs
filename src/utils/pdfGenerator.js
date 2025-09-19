@@ -267,8 +267,9 @@ const createCategoryTable = (doc, category, materials, startY, brand = '') => {
 /**
  * Crea el footer del PDF
  * @param {jsPDF} doc - Documento PDF
+ * @param {string} type - Tipo de documento ('instalaciones' o 'presupuestos')
  */
-const createFooter = (doc) => {
+const createFooter = (doc, type = 'instalaciones') => {
   const { margins, pageWidth, pageHeight, colors, fonts } = PDF_CONFIG;
   const pageCount = doc.internal.getNumberOfPages();
   
@@ -284,7 +285,8 @@ const createFooter = (doc) => {
     doc.setFontSize(fonts.footer.size);
     doc.setTextColor(colors.mediumGray[0], colors.mediumGray[1], colors.mediumGray[2]);
     doc.setFont('helvetica', fonts.footer.weight);
-    doc.text('AFS Presupuestos', margins.left, pageHeight - margins.bottom - 5);
+    const footerText = type === 'presupuestos' ? 'AFS Presupuestos' : 'AFS Instalaciones';
+    doc.text(footerText, margins.left, pageHeight - margins.bottom - 5);
     doc.text(`Página ${i} de ${pageCount}`, pageWidth - margins.right - 20, pageHeight - margins.bottom - 5, { align: 'right' });
   }
 };
@@ -417,20 +419,35 @@ const createBudgetSection = (doc, works, total, startY) => {
  * @param {Object} quantities - Cantidades seleccionadas
  * @param {string} obraName - Nombre de la obra
  * @param {Object} brands - Marcas por categoría
+ * @param {string} direccion - Dirección de la obra
  * @returns {jsPDF} Documento PDF generado
  */
-export const generatePDF = (materials = [], quantities = {}, obraName = '', brands = {}) => {
+export const generatePDF = (materials = [], quantities = {}, obraName = '', brands = {}, direccion = '') => {
   const doc = new jsPDF({
     orientation: 'portrait',
     unit: 'mm',
     format: 'a4'
   });
   
-  createHeader(doc, obraName);
+  // Crear encabezado con formato "Obra de: [nombre]"
+  const obraText = obraName ? `Obra de: ${obraName.toUpperCase()}` : 'Obra de: [Sin especificar]';
+  createHeader(doc, obraText);
+  
+  // Agregar dirección si existe
+  let startY = PDF_CONFIG.margins.top + 50;
+  if (direccion && direccion.trim()) {
+    const { margins, colors } = PDF_CONFIG;
+    
+    doc.setFontSize(11);
+    doc.setTextColor(colors.black[0], colors.black[1], colors.black[2]);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Dirección: ${direccion.toUpperCase()}`, margins.left, startY);
+    startY += 8;
+  }
   
   const materialsByCategory = groupMaterialsByCategory(materials, quantities);
   
-  let currentY = PDF_CONFIG.margins.top + 50;
+  let currentY = startY;
 
   // Crear tabla para cada categoría
   Object.keys(materialsByCategory).forEach(category => {
@@ -447,7 +464,7 @@ export const generatePDF = (materials = [], quantities = {}, obraName = '', bran
     doc.text('No hay materiales seleccionados', PDF_CONFIG.margins.left, currentY);
   }
   
-  createFooter(doc);
+  createFooter(doc, 'instalaciones');
   
   return doc;
 };
@@ -485,8 +502,7 @@ export const generateBudgetPDF = (obraName = '', direccion = '', works = [], tot
   
   createBudgetSection(doc, works, total, startY);
   
-  // Crear footer
-  createFooter(doc);
+  createFooter(doc, 'presupuestos');
   
   return doc;
 };
@@ -658,17 +674,19 @@ const supportsFileConstructor = () => {
  * @param {Object} quantities - Cantidades seleccionadas
  * @param {string} obraName - Nombre de la obra
  * @param {Object} brands - Marcas por categoría
+ * @param {string} direccion - Dirección de la obra
  * @returns {Promise<void>}
  */
-export const generateAndSharePDF = async (materials = [], quantities = {}, obraName = '', brands = {}) => {
+export const generateAndSharePDF = async (materials = [], quantities = {}, obraName = '', brands = {}, direccion = '') => {
   try {
     // Validar parámetros
     const safeMaterials = Array.isArray(materials) ? materials : [];
     const safeQuantities = typeof quantities === 'object' && quantities !== null ? quantities : {};
     const safeObraName = typeof obraName === 'string' ? obraName : '';
     const safeBrands = typeof brands === 'object' && brands !== null ? brands : {};
+    const safeDireccion = typeof direccion === 'string' ? direccion : '';
     
-    const doc = generatePDF(safeMaterials, safeQuantities, safeObraName, safeBrands);
+    const doc = generatePDF(safeMaterials, safeQuantities, safeObraName, safeBrands, safeDireccion);
     
     // Convertir a blob de forma segura
     let pdfBlob;
@@ -681,7 +699,7 @@ export const generateAndSharePDF = async (materials = [], quantities = {}, obraN
     // Intentar compartir con Web Share API si está disponible
     if (supportsWebShare() && supportsFileConstructor()) {
       try {
-        const fileName = `AFS-${formatObraNameForFile(safeObraName)}-${new Date().toISOString().split('T')[0]}.pdf`;
+        const fileName = `AFS-INSTALACION-${formatObraNameForFile(safeObraName)}-${new Date().toISOString().split('T')[0]}.pdf`;
         const file = new File([pdfBlob], fileName, { type: 'application/pdf' });
         
         // Verificar si se puede compartir este archivo
@@ -739,7 +757,7 @@ const downloadPDF = (doc, obraName = '') => {
     }
     
     const url = URL.createObjectURL(pdfBlob);
-    const fileName = `AFS-${formatObraNameForFile(obraName)}-${new Date().toISOString().split('T')[0]}.pdf`;
+    const fileName = `AFS-INSTALACION-${formatObraNameForFile(obraName)}-${new Date().toISOString().split('T')[0]}.pdf`;
     
     const link = document.createElement('a');
     link.href = url;

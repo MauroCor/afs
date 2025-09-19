@@ -20,6 +20,7 @@ const InstallationsPage = () => {
   });
   const [brands, setBrands] = useState({});
   const [obraName, setObraName] = useState('');
+  const [direccion, setDireccion] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
 
@@ -57,6 +58,7 @@ const InstallationsPage = () => {
       setIsAuthenticated(false);
       setQuantities(resetQuantities());
       setObraName('');
+      setDireccion('');
       navigate('/login', { replace: true });
     }
   };
@@ -76,7 +78,7 @@ const InstallationsPage = () => {
     setIsGeneratingPDF(true);
     
     try {
-      await generateAndSharePDF(materials, quantities, obraName, brands);
+      await generateAndSharePDF(materials, quantities, obraName, brands, direccion);
     } catch (error) {
       console.error('Error al generar PDF:', error);
       alert('Error al generar el PDF. Por favor, intenta nuevamente.');
@@ -135,7 +137,18 @@ const InstallationsPage = () => {
             value={obraName}
             onChange={(e) => setObraName(e.target.value)}
             className="w-full text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg px-3 py-2 focus:border-afs-blue focus:outline-none"
-            placeholder="Nombre de la obra"
+            placeholder="Obra de..."
+          />
+        </div>
+
+        {/* Campo dirección */}
+        <div className="mb-4">
+          <input
+            type="text"
+            value={direccion}
+            onChange={(e) => setDireccion(e.target.value)}
+            className="w-full text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg px-3 py-2 focus:border-afs-blue focus:outline-none"
+            placeholder="Dirección..."
           />
         </div>
 
