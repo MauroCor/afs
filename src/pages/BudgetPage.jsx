@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { generateAndShareBudgetPDF } from '../utils/pdfGenerator';
 import BudgetForm from '../components/BudgetForm';
+import AddBudgetModal from '../components/AddBudgetModal';
 import Footer from '../components/Footer';
 import logo from '../images/logo.png';
 
@@ -9,6 +10,9 @@ const BudgetPage = () => {
   const navigate = useNavigate();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isGeneratingBudgetPDF, setIsGeneratingBudgetPDF] = useState(false);
+  const [works, setWorks] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Verificar autenticación al montar el componente
   useEffect(() => {
@@ -29,11 +33,11 @@ const BudgetPage = () => {
     }
   };
 
-  const handleGenerateBudgetPDF = async (clientName, budgetText) => {
+  const handleGenerateBudgetPDF = async (obraName, direccion, works, total) => {
     setIsGeneratingBudgetPDF(true);
     
     try {
-      await generateAndShareBudgetPDF(clientName, budgetText);
+      await generateAndShareBudgetPDF(obraName, direccion, works, total);
     } catch (error) {
       console.error('Error al generar PDF de presupuesto:', error);
       alert('Error al generar el PDF de presupuesto. Por favor, intenta nuevamente.');
@@ -41,6 +45,20 @@ const BudgetPage = () => {
       setIsGeneratingBudgetPDF(false);
     }
   };
+
+  const handleAddWork = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleAddWorkSubmit = (newWork) => {
+    setWorks(prev => [...prev, newWork]);
+  };
+
+  const handleCategoryChange = (category) => {
+    setSelectedCategory(category);
+  };
+
+  const total = works.reduce((sum, work) => sum + work.monto, 0);
 
   // No renderizar si no está autenticado
   if (!isAuthenticated) {
@@ -89,11 +107,24 @@ const BudgetPage = () => {
         <BudgetForm 
           onGeneratePDF={handleGenerateBudgetPDF}
           isGeneratingPDF={isGeneratingBudgetPDF}
+          onAddWork={handleAddWork}
+          works={works}
+          total={total}
+          selectedCategory={selectedCategory}
+          onCategoryChange={handleCategoryChange}
         />
 
         {/* Espaciado para el footer */}
         <div className="h-4"></div>
       </div>
+
+      {/* Modal agregar trabajo */}
+      <AddBudgetModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onAddWork={handleAddWorkSubmit}
+        selectedCategory={selectedCategory}
+      />
 
       {/* Footer */}
       <Footer />

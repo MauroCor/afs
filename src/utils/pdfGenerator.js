@@ -130,7 +130,21 @@ const createHeader = (doc, obraName) => {
   // Nombre de la obra y fecha en una línea, más discretos
   const contentY = separatorY + 8;
   
-  // Fecha a la izquierda
+  // Obra de a la izquierda
+  if (obraName && obraName.trim()) {
+    doc.setFontSize(11);
+    doc.setTextColor(PDF_CONFIG.colors.black[0], PDF_CONFIG.colors.black[1], PDF_CONFIG.colors.black[2]);
+    doc.setFont('helvetica', 'normal');
+    doc.text(obraName, margins.left, contentY);
+  } else {
+    // Si no hay nombre de obra, usar "" como fallback
+    doc.setFontSize(11);
+    doc.setTextColor(PDF_CONFIG.colors.black[0], PDF_CONFIG.colors.black[1], PDF_CONFIG.colors.black[2]);
+    doc.setFont('helvetica', 'normal');
+    doc.text('', margins.left, contentY);
+  }
+  
+  // Fecha a la derecha
   const now = new Date();
   const dateString = now.toLocaleDateString('es-ES', {
     year: 'numeric',
@@ -141,21 +155,7 @@ const createHeader = (doc, obraName) => {
   doc.setFontSize(11);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(PDF_CONFIG.colors.black[0], PDF_CONFIG.colors.black[1], PDF_CONFIG.colors.black[2]);
-  doc.text(`Fecha: ${dateString}`, margins.left, contentY);
-  
-  // Nombre de la obra a la derecha, más discreto
-  if (obraName && obraName.trim()) {
-    doc.setFontSize(11);
-    doc.setTextColor(PDF_CONFIG.colors.black[0], PDF_CONFIG.colors.black[1], PDF_CONFIG.colors.black[2]);
-    doc.setFont('helvetica', 'normal'); // Sin negrita, más discreto
-    doc.text(obraName.toUpperCase(), pageWidth - margins.right - 5, contentY, { align: 'right' });
-  } else {
-    // Si no hay nombre de obra, usar "" como fallback
-    doc.setFontSize(11);
-    doc.setTextColor(PDF_CONFIG.colors.black[0], PDF_CONFIG.colors.black[1], PDF_CONFIG.colors.black[2]);
-    doc.setFont('helvetica', 'normal');
-    doc.text('', pageWidth - margins.right - 5, contentY, { align: 'right' });
-  }
+  doc.text(`Fecha: ${dateString}`, pageWidth - margins.right - 5, contentY, { align: 'right' });
   
 };
 
@@ -284,7 +284,7 @@ const createFooter = (doc) => {
     doc.setFontSize(fonts.footer.size);
     doc.setTextColor(colors.mediumGray[0], colors.mediumGray[1], colors.mediumGray[2]);
     doc.setFont('helvetica', fonts.footer.weight);
-    doc.text('AFS Instalaciones', margins.left, pageHeight - margins.bottom - 5);
+    doc.text('AFS Presupuestos', margins.left, pageHeight - margins.bottom - 5);
     doc.text(`Página ${i} de ${pageCount}`, pageWidth - margins.right - 20, pageHeight - margins.bottom - 5, { align: 'right' });
   }
 };
@@ -292,11 +292,12 @@ const createFooter = (doc) => {
 /**
  * Crea una sección de presupuesto en el PDF
  * @param {jsPDF} doc - Documento PDF
- * @param {string} budgetText - Texto del presupuesto
+ * @param {Array} works - Lista de trabajos
+ * @param {number} total - Total del presupuesto
  * @param {number} startY - Posición Y inicial
  * @returns {number} Posición Y final
  */
-const createBudgetSection = (doc, budgetText, startY) => {
+const createBudgetSection = (doc, works, total, startY) => {
   const { margins, pageWidth, colors, fonts } = PDF_CONFIG;
   const tableWidth = pageWidth - margins.left - margins.right;
   const headerHeight = 10;
@@ -314,25 +315,98 @@ const createBudgetSection = (doc, budgetText, startY) => {
   
   currentY += headerHeight + 10;
   
-  // Contenido del presupuesto
+  // Lista de trabajos
   doc.setFontSize(fonts.tableContent.size);
   doc.setTextColor(colors.black[0], colors.black[1], colors.black[2]);
   doc.setFont('helvetica', 'normal');
   
-  // Dividir el texto en líneas que quepan en el ancho de la página
-  const maxWidth = tableWidth - 10;
-  const budgetLines = doc.splitTextToSize(budgetText, maxWidth);
-  
-  budgetLines.forEach(line => {
+  works.forEach((work, index) => {
     // Verificar espacio en página
-    if (currentY + 5 > PDF_CONFIG.pageHeight - PDF_CONFIG.margins.bottom - 20) {
+    if (currentY + 8 > PDF_CONFIG.pageHeight - PDF_CONFIG.margins.bottom - 20) {
       doc.addPage();
       currentY = PDF_CONFIG.margins.top;
     }
     
-    doc.text(line, margins.left + 5, currentY);
-    currentY += 5;
+    // Separador visual entre items (excepto el primero)
+    if (index > 0) {
+      doc.setDrawColor(colors.lightGray[0], colors.lightGray[1], colors.lightGray[2]);
+      doc.setLineWidth(0.3);
+      doc.line(margins.left + 5, currentY - 2, margins.left + tableWidth - 5, currentY - 2);
+      currentY += 3;
+    }
+    
+    // Trabajo y monto en la misma línea (texto grande)
+    doc.setFontSize(fonts.tableContent.size);
+    doc.setTextColor(colors.black[0], colors.black[1], colors.black[2]);
+    doc.setFont('helvetica', 'normal');
+    
+    // Calcular espacio disponible para el texto del trabajo
+    const montoText = `$${work.monto.toLocaleString()}`;
+    const montoWidth = doc.getTextWidth(montoText);
+    const availableWidth = tableWidth - montoWidth - 20; // 20mm de margen entre texto y precio
+    
+    // Dividir el texto del trabajo si es muy largo
+    const workLines = doc.splitTextToSize(work.trabajo, availableWidth);
+    
+    // Trabajo a la izquierda (puede ser múltiples líneas)
+    workLines.forEach((line, lineIndex) => {
+      if (lineIndex === 0) {
+        // Primera línea: trabajo a la izquierda, monto a la derecha
+        doc.text(line, margins.left + 5, currentY);
+        doc.text(montoText, margins.left + tableWidth - 5, currentY, { align: 'right' });
+      } else {
+        // Líneas adicionales: solo el texto del trabajo
+        doc.text(line, margins.left + 5, currentY);
+      }
+      currentY += 6;
+    });
+    
+    // Descripción si existe (texto más pequeño)
+    if (work.descripcion && work.descripcion.trim()) {
+      const descLines = doc.splitTextToSize(work.descripcion, tableWidth - 10);
+      descLines.forEach(line => {
+        if (currentY + 5 > PDF_CONFIG.pageHeight - PDF_CONFIG.margins.bottom - 20) {
+          doc.addPage();
+          currentY = PDF_CONFIG.margins.top;
+        }
+        doc.setFontSize(fonts.tableContent.size - 2); // Texto más pequeño
+        doc.setTextColor(colors.mediumGray[0], colors.mediumGray[1], colors.mediumGray[2]);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`  ${line}`, margins.left + 5, currentY);
+        currentY += 4;
+      });
+      currentY += 2;
+    }
   });
+  
+  // Línea separadora antes del total
+  currentY += 5;
+  doc.setDrawColor(colors.lightGray[0], colors.lightGray[1], colors.lightGray[2]);
+  doc.setLineWidth(0.5);
+  doc.line(margins.left + 5, currentY, margins.left + tableWidth - 5, currentY);
+  currentY += 5;
+  
+  // Total
+  doc.setFontSize(fonts.tableHeader.size);
+  doc.setTextColor(colors.black[0], colors.black[1], colors.black[2]);
+  doc.setFont('helvetica', 'bold');
+  
+  // "TOTAL:" a la izquierda
+  doc.text('TOTAL:', margins.left + 5, currentY);
+  
+  // Monto total a la derecha
+  const totalText = `$${total.toLocaleString()}`;
+  doc.text(totalText, margins.left + tableWidth - 5, currentY, { align: 'right' });
+  currentY += 15;
+  
+  // Textos fijos al final
+  doc.setFontSize(fonts.tableContent.size);
+  doc.setTextColor(colors.mediumGray[0], colors.mediumGray[1], colors.mediumGray[2]);
+  doc.setFont('helvetica', 'normal');
+  
+  doc.text('No incluye materiales a utilizar.', margins.left + 5, currentY);
+  currentY += 5;
+  doc.text('Duración del presupuesto: 30 días hábiles.', margins.left + 5, currentY);
   
   return currentY + 10; // Espacio después del presupuesto
 };
@@ -346,21 +420,18 @@ const createBudgetSection = (doc, budgetText, startY) => {
  * @returns {jsPDF} Documento PDF generado
  */
 export const generatePDF = (materials = [], quantities = {}, obraName = '', brands = {}) => {
-  // Crear nuevo documento PDF A4
   const doc = new jsPDF({
     orientation: 'portrait',
     unit: 'mm',
     format: 'a4'
   });
   
-  // Crear encabezado
   createHeader(doc, obraName);
   
-  // Agrupar materiales por categoría
   const materialsByCategory = groupMaterialsByCategory(materials, quantities);
   
-  let currentY = PDF_CONFIG.margins.top + 50; // Espacio después del encabezado (ajustado para el nuevo diseño)
-  
+  let currentY = PDF_CONFIG.margins.top + 50;
+
   // Crear tabla para cada categoría
   Object.keys(materialsByCategory).forEach(category => {
     const categoryMaterials = materialsByCategory[category];
@@ -376,19 +447,20 @@ export const generatePDF = (materials = [], quantities = {}, obraName = '', bran
     doc.text('No hay materiales seleccionados', PDF_CONFIG.margins.left, currentY);
   }
   
-  // Crear footer
   createFooter(doc);
   
   return doc;
 };
 
 /**
- * Genera un PDF de presupuesto con el nombre del cliente y texto libre
- * @param {string} clientName - Nombre del cliente
- * @param {string} budgetText - Texto del presupuesto
+ * Genera un PDF de presupuesto con el nombre del cliente y trabajos
+ * @param {string} obraName - Nombre de la obra
+ * @param {string} direccion - Dirección de la obra
+ * @param {Array} works - Lista de trabajos
+ * @param {number} total - Total del presupuesto
  * @returns {jsPDF} Documento PDF generado
  */
-export const generateBudgetPDF = (clientName = '', budgetText = '') => {
+export const generateBudgetPDF = (obraName = '', direccion = '', works = [], total = 0) => {
   // Crear nuevo documento PDF A4
   const doc = new jsPDF({
     orientation: 'portrait',
@@ -396,11 +468,22 @@ export const generateBudgetPDF = (clientName = '', budgetText = '') => {
     format: 'a4'
   });
   
-  // Crear encabezado usando el nombre del cliente como nombre de obra
-  createHeader(doc, clientName);
+  const obraText = obraName ? `Obra de: ${obraName.toUpperCase()}` : 'Obra de: [Sin especificar]';
+  createHeader(doc, obraText);
   
-  // Crear sección de presupuesto
-  createBudgetSection(doc, budgetText, PDF_CONFIG.margins.top + 50);
+  // Agregar dirección si existe
+  let startY = PDF_CONFIG.margins.top + 50;
+  if (direccion && direccion.trim()) {
+    const { margins, colors } = PDF_CONFIG;
+    
+    doc.setFontSize(11);
+    doc.setTextColor(colors.black[0], colors.black[1], colors.black[2]);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Dirección: ${direccion.toUpperCase()}`, margins.left, startY);
+    startY += 8;
+  }
+  
+  createBudgetSection(doc, works, total, startY);
   
   // Crear footer
   createFooter(doc);
@@ -410,17 +493,21 @@ export const generateBudgetPDF = (clientName = '', budgetText = '') => {
 
 /**
  * Genera y comparte un PDF de presupuesto (compatible con móvil)
- * @param {string} clientName - Nombre del cliente
- * @param {string} budgetText - Texto del presupuesto
+ * @param {string} obraName - Nombre de la obra
+ * @param {string} direccion - Dirección de la obra
+ * @param {Array} works - Lista de trabajos
+ * @param {number} total - Total del presupuesto
  * @returns {Promise<void>}
  */
-export const generateAndShareBudgetPDF = async (clientName = '', budgetText = '') => {
+export const generateAndShareBudgetPDF = async (obraName = '', direccion = '', works = [], total = 0) => {
   try {
     // Validar parámetros
-    const safeClientName = typeof clientName === 'string' ? clientName : '';
-    const safeBudgetText = typeof budgetText === 'string' ? budgetText : '';
+    const safeObraName = typeof obraName === 'string' ? obraName : '';
+    const safeDireccion = typeof direccion === 'string' ? direccion : '';
+    const safeWorks = Array.isArray(works) ? works : [];
+    const safeTotal = typeof total === 'number' ? total : 0;
     
-    const doc = generateBudgetPDF(safeClientName, safeBudgetText);
+    const doc = generateBudgetPDF(safeObraName, safeDireccion, safeWorks, safeTotal);
     
     // Convertir a blob de forma segura
     let pdfBlob;
@@ -433,14 +520,14 @@ export const generateAndShareBudgetPDF = async (clientName = '', budgetText = ''
     // Intentar compartir con Web Share API si está disponible
     if (supportsWebShare() && supportsFileConstructor()) {
       try {
-        const fileName = `AFS-${formatObraNameForFile(safeClientName)}-${new Date().toISOString().split('T')[0]}.pdf`;
+        const fileName = `AFS-PRESUPUESTO-${formatObraNameForFile(safeObraName)}-${new Date().toISOString().split('T')[0]}.pdf`;
         const file = new File([pdfBlob], fileName, { type: 'application/pdf' });
         
         // Verificar si se puede compartir este archivo
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
           await navigator.share({
             title: 'AFS Presupuesto',
-            text: `Presupuesto para ${safeClientName || 'el cliente'}`,
+            text: `Presupuesto para ${safeObraName || 'la obra'}`,
             files: [file]
           });
           return;
@@ -451,7 +538,7 @@ export const generateAndShareBudgetPDF = async (clientName = '', budgetText = ''
     }
     
     // Fallback: descargar el archivo
-    downloadBudgetPDF(doc, safeClientName);
+    downloadBudgetPDF(doc, safeObraName);
     
   } catch (error) {
     // Mostrar error más específico
@@ -467,8 +554,8 @@ export const generateAndShareBudgetPDF = async (clientName = '', budgetText = ''
     
     // Intentar descarga de emergencia
     try {
-      const doc = generateBudgetPDF(clientName, budgetText);
-      downloadBudgetPDF(doc, clientName);
+      const doc = generateBudgetPDF(obraName, direccion, works, total);
+      downloadBudgetPDF(doc, obraName);
     } catch (fallbackError) {
       alert('Error crítico. Por favor, recarga la página e intenta nuevamente.');
     }
@@ -478,9 +565,9 @@ export const generateAndShareBudgetPDF = async (clientName = '', budgetText = ''
 /**
  * Descarga el PDF de presupuesto generado (compatible con móviles)
  * @param {jsPDF} doc - Documento PDF
- * @param {string} clientName - Nombre del cliente
+ * @param {string} obraName - Nombre de la obra
  */
-const downloadBudgetPDF = (doc, clientName = '') => {
+const downloadBudgetPDF = (doc, obraName = '') => {
   try {
     // Generar blob de forma segura
     let pdfBlob;
@@ -490,19 +577,14 @@ const downloadBudgetPDF = (doc, clientName = '') => {
       throw new Error('No se pudo generar el archivo PDF');
     }
     
-    // Crear URL del blob
     const url = URL.createObjectURL(pdfBlob);
+    const fileName = `AFS-PRESUPUESTO-${formatObraNameForFile(obraName)}-${new Date().toISOString().split('T')[0]}.pdf`;
     
-    // Crear nombre de archivo seguro
-    const fileName = `AFS-${formatObraNameForFile(clientName)}-${new Date().toISOString().split('T')[0]}.pdf`;
-    
-    // Crear enlace de descarga
     const link = document.createElement('a');
     link.href = url;
     link.download = fileName;
     link.style.display = 'none';
     
-    // Agregar al DOM temporalmente
     document.body.appendChild(link);
     
     // Intentar descarga
@@ -656,19 +738,14 @@ const downloadPDF = (doc, obraName = '') => {
       throw new Error('No se pudo generar el archivo PDF');
     }
     
-    // Crear URL del blob
     const url = URL.createObjectURL(pdfBlob);
-    
-    // Crear nombre de archivo seguro
     const fileName = `AFS-${formatObraNameForFile(obraName)}-${new Date().toISOString().split('T')[0]}.pdf`;
     
-    // Crear enlace de descarga
     const link = document.createElement('a');
     link.href = url;
     link.download = fileName;
     link.style.display = 'none';
     
-    // Agregar al DOM temporalmente
     document.body.appendChild(link);
     
     // Intentar descarga

@@ -1,56 +1,102 @@
 import React, { useState } from 'react';
 
-const BudgetForm = ({ onGeneratePDF, isGeneratingPDF }) => {
-  const [clientName, setClientName] = useState('');
-  const [budgetText, setBudgetText] = useState('');
+const BudgetForm = ({ onGeneratePDF, isGeneratingPDF, onAddWork, works, total, selectedCategory, onCategoryChange }) => {
+  const [obraName, setObraName] = useState('');
+  const [direccion, setDireccion] = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (clientName.trim() && budgetText.trim()) {
-      onGeneratePDF(clientName, budgetText);
+    if (obraName.trim()) {
+      onGeneratePDF(obraName, direccion, works, total);
     }
   };
 
+  const categories = ['GAS', 'AGUA PLUVIAL', 'SANITARIO', 'CALEFACCION'];
+
   return (
     <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+      <h2 className="text-xl font-bold text-gray-900 mb-4">Generar Presupuesto</h2>
+      
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Campo nombre del cliente */}
+        {/* Campo Obra de */}
         <div>
-          <label htmlFor="clientName" className="block text-sm font-medium text-gray-700 mb-2">
-            Nombre:
-          </label>
           <input
             type="text"
-            id="clientName"
-            value={clientName}
-            onChange={(e) => setClientName(e.target.value)}
+            id="obraName"
+            value={obraName}
+            onChange={(e) => setObraName(e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="Ingrese el nombre del cliente"
+            placeholder="Obra de..."
             required
           />
         </div>
 
-        {/* Campo de texto libre para actividades y montos */}
+        {/* Campo Dirección */}
         <div>
-          <label htmlFor="budgetText" className="block text-sm font-medium text-gray-700 mb-2">
-            Presupuesto:
-          </label>
-          <textarea
-            id="budgetText"
-            value={budgetText}
-            onChange={(e) => setBudgetText(e.target.value)}
-            rows={8}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-vertical"
-            placeholder="Ingrese el trabajo realizado"
-            required
+          <input
+            type="text"
+            id="direccion"
+            value={direccion}
+            onChange={(e) => setDireccion(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="Dirección..."
           />
+        </div>
+
+        {/* Campo Categoría */}
+        <div>
+          <select
+            id="categoria"
+            value={selectedCategory}
+            onChange={(e) => onCategoryChange(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          >
+            <option value="">Seleccione una categoría</option>
+            {categories.map(category => (
+              <option key={category} value={category}>{category}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* Lista de trabajos agregados */}
+        {works.length > 0 && (
+          <div className="mt-4">
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Trabajos Agregados:</h3>
+            <div className="space-y-2">
+              {works.map((work, index) => (
+                <div key={index} className="flex justify-between items-center bg-gray-50 p-2 rounded">
+                  <span className="text-sm">{work.trabajo}</span>
+                  <span className="text-sm font-medium">${work.monto.toLocaleString()}</span>
+                </div>
+              ))}
+            </div>
+            <div className="mt-2 pt-2 border-t border-gray-200">
+              <div className="flex justify-between items-center font-bold text-lg">
+                <span>TOTAL:</span>
+                <span>${total.toLocaleString()}</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Botón Agregar */}
+        <div className="flex justify-center">
+          <button
+            type="button"
+            onClick={onAddWork}
+            disabled={!selectedCategory}
+            className="btn-primary flex items-center justify-center space-x-1 text-sm py-2 px-4 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <span className="text-lg">+</span>
+            <span>Agregar</span>
+          </button>
         </div>
 
         {/* Botón generar PDF */}
         <div className="flex justify-center">
           <button
             type="submit"
-            disabled={isGeneratingPDF || !clientName.trim() || !budgetText.trim()}
+            disabled={isGeneratingPDF || !obraName.trim() || works.length === 0}
             className="bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-medium py-3 px-6 rounded-md transition duration-200 flex items-center space-x-2"
           >
             <svg 
