@@ -129,9 +129,14 @@ const CategorySection = ({ category, materials, quantities, onQuantityChange, on
               
               // Para "OTROS MATERIALES" con sección vacía, mostrar materiales directamente sin header de sección
               if (category === 'OTROS MATERIALES' && (!section || section.trim() === '')) {
+                // Ordenar materiales alfabéticamente por nombre
+                const sortedMaterials = [...sectionMaterials].sort((a, b) => 
+                  a.name.localeCompare(b.name, 'es', { sensitivity: 'base' })
+                );
+                
                 return (
                   <div key={section} className="divide-y divide-gray-200">
-                    {sectionMaterials.map(material => (
+                    {sortedMaterials.map(material => (
                       <MaterialRow
                         key={material.id}
                         material={material}
@@ -186,7 +191,9 @@ const CategorySection = ({ category, materials, quantities, onQuantityChange, on
                   {/* Materiales de la sección - solo si está expandida */}
                   {isSectionExpanded && (
                     <div className="divide-y divide-gray-200">
-                      {sectionMaterials.map(material => (
+                      {[...sectionMaterials]
+                        .sort((a, b) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }))
+                        .map(material => (
                         <MaterialRow
                           key={material.id}
                           material={material}
