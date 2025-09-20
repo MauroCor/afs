@@ -326,7 +326,11 @@ const createBudgetSection = (doc, works, total, startY) => {
     });
     
     if (work.descripcion && work.descripcion.trim()) {
-      const descLines = doc.splitTextToSize(work.descripcion, tableWidth - 10);
+      const montoText = `$${work.monto.toLocaleString()}`;
+      const montoWidth = doc.getTextWidth(montoText);
+      const availableWidthForDesc = tableWidth - montoWidth - 20;
+      
+      const descLines = doc.splitTextToSize(work.descripcion, availableWidthForDesc);
       descLines.forEach(line => {
         if (currentY + 5 > PDF_CONFIG.pageHeight - PDF_CONFIG.margins.bottom - 20) {
           doc.addPage();
