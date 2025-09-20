@@ -41,7 +41,6 @@ const PDF_CONFIG = {
  */
 const createLogo = (doc, x, y, size = 20) => {
   try {
-    // Intentar usar la imagen real del logo
     if (logo) {
       doc.addImage(logo, 'PNG', x, y, size, size);
       return;
@@ -50,26 +49,21 @@ const createLogo = (doc, x, y, size = 20) => {
     // Fallback silencioso
   }
   
-  // Fallback: Logo programático (si la imagen falla)
   const centerX = x + size/2;
   const centerY = y + size/2;
   
-  // Fondo del logo
   doc.setFillColor(240, 240, 240);
   doc.rect(x, y, size, size, 'F');
   
-  // Borde del logo
   doc.setDrawColor(200, 200, 200);
   doc.setLineWidth(0.5);
   doc.rect(x, y, size, size);
   
-  // Texto AFS
   doc.setFontSize(12);
   doc.setTextColor(0, 0, 0);
   doc.setFont('helvetica', 'bold');
   doc.text('AFS', centerX, centerY, { align: 'center' });
   
-  // Línea decorativa
   doc.setDrawColor(100, 100, 100);
   doc.setLineWidth(0.3);
   doc.line(x + 2, centerY + 5, x + size - 2, centerY + 5);
@@ -83,12 +77,10 @@ const createLogo = (doc, x, y, size = 20) => {
 const createHeader = (doc, obraName) => {
   const { margins, pageWidth } = PDF_CONFIG;
   
-  // Logo más arriba y centrado verticalmente con el contacto
   const logoSize = 28;
-  const logoY = margins.top - 2; // Un poco más arriba
+  const logoY = margins.top - 2;
   createLogo(doc, margins.left, logoY, logoSize);
   
-  // Información profesional - más grande y mejor organizada
   const professionalInfo = [
     'ADRIÁN FERNANDO SECULINI',
     'Maestro Mayor de Obras - M.P. 1663/1',
@@ -96,41 +88,33 @@ const createHeader = (doc, obraName) => {
     '3517642188 / adrianseculini@hotmail.com'
   ];
   
-  // Posición inicial para la información profesional (centrada con el logo)
-  let infoY = logoY + 8; // Centrado con el logo
+  let infoY = logoY + 8;
   
   professionalInfo.forEach((line, index) => {
     if (index === 0) {
-      // Nombre más grande y prominente
       doc.setFontSize(12);
       doc.setFont('helvetica', 'bold');
       doc.setTextColor(PDF_CONFIG.colors.black[0], PDF_CONFIG.colors.black[1], PDF_CONFIG.colors.black[2]);
     } else if (index === 1) {
-      // Título profesional
       doc.setFontSize(10);
       doc.setFont('helvetica', 'bold');
       doc.setTextColor(PDF_CONFIG.colors.darkGray[0], PDF_CONFIG.colors.darkGray[1], PDF_CONFIG.colors.darkGray[2]);
     } else {
-      // Información de contacto
       doc.setFontSize(9);
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(PDF_CONFIG.colors.mediumGray[0], PDF_CONFIG.colors.mediumGray[1], PDF_CONFIG.colors.mediumGray[2]);
     }
     
     doc.text(line, pageWidth - margins.right - 5, infoY, { align: 'right' });
-    infoY += index === 0 ? 7 : 5; // Mejor espaciado
+    infoY += index === 0 ? 7 : 5;
   });
   
-  // Línea separadora elegante
   const separatorY = logoY + logoSize + 8;
   doc.setDrawColor(200, 200, 200);
   doc.setLineWidth(0.5);
   doc.line(margins.left, separatorY, pageWidth - margins.right, separatorY);
   
-  // Nombre de la obra y fecha en una línea, más discretos
   const contentY = separatorY + 8;
-  
-  // Obra de a la izquierda
   if (obraName && obraName.trim()) {
     doc.setFontSize(11);
     doc.setTextColor(PDF_CONFIG.colors.black[0], PDF_CONFIG.colors.black[1], PDF_CONFIG.colors.black[2]);
@@ -196,13 +180,12 @@ const groupMaterialsByCategory = (materials, quantities) => {
 const createCategoryTable = (doc, category, materials, startY, brand = '') => {
   const { margins, pageWidth, colors, fonts } = PDF_CONFIG;
   const tableWidth = pageWidth - margins.left - margins.right;
-  const colWidths = [tableWidth * 0.2, tableWidth * 0.8]; // Cantidad, Detalle
+  const colWidths = [tableWidth * 0.2, tableWidth * 0.8];
   const rowHeight = 8;
   const headerHeight = 10;
   
   let currentY = startY;
   
-  // Encabezado de categoría
   doc.setFillColor(colors.lightGray[0], colors.lightGray[1], colors.lightGray[2]);
   doc.rect(margins.left, currentY, tableWidth, headerHeight, 'F');
   
@@ -210,13 +193,11 @@ const createCategoryTable = (doc, category, materials, startY, brand = '') => {
   doc.setTextColor(colors.black[0], colors.black[1], colors.black[2]);
   doc.setFont('helvetica', fonts.category.weight);
   
-  // Mostrar categoría con marca si existe
   const categoryTitle = brand ? `${category} - ${brand}` : category;
   doc.text(categoryTitle, margins.left + tableWidth/2, currentY + 6, { align: 'center' });
   
   currentY += headerHeight + 2;
   
-  // Encabezados de tabla
   doc.setFillColor(colors.veryLightGray[0], colors.veryLightGray[1], colors.veryLightGray[2]);
   doc.rect(margins.left, currentY, tableWidth, rowHeight, 'F');
   
@@ -230,30 +211,23 @@ const createCategoryTable = (doc, category, materials, startY, brand = '') => {
   doc.text('Detalle', xPos, currentY + 5);
   
   currentY += rowHeight;
-  
-  // Filas de materiales
   materials.forEach((material, index) => {
-    // Verificar espacio en página
     if (currentY + rowHeight > PDF_CONFIG.pageHeight - PDF_CONFIG.margins.bottom - 20) {
       doc.addPage();
       currentY = PDF_CONFIG.margins.top;
     }
     
-    // Alternar colores de fondo
     const bgColor = index % 2 === 0 ? colors.white : colors.veryLightGray;
     doc.setFillColor(bgColor[0], bgColor[1], bgColor[2]);
     doc.rect(margins.left, currentY, tableWidth, rowHeight, 'F');
     
-    // Contenido de la fila
     doc.setFontSize(fonts.tableContent.size);
     doc.setTextColor(colors.black[0], colors.black[1], colors.black[2]);
     doc.setFont('helvetica', fonts.tableContent.weight);
     
     xPos = margins.left + 5;
-    // Cantidad
     doc.text(material.quantity.toString(), xPos, currentY + 5);
     xPos += colWidths[0];
-    // Detalle (nombre del material) - manejar nombres largos con ajuste automático
     const maxWidth = colWidths[1] - 10;
     const materialName = doc.splitTextToSize(material.name, maxWidth);
     doc.text(materialName, xPos, currentY + 5);
@@ -261,7 +235,7 @@ const createCategoryTable = (doc, category, materials, startY, brand = '') => {
     currentY += rowHeight;
   });
   
-  return currentY + 10; // Espacio después de la tabla
+  return currentY + 10;
 };
 
 /**
@@ -276,12 +250,10 @@ const createFooter = (doc, type = 'instalaciones') => {
   for (let i = 1; i <= pageCount; i++) {
     doc.setPage(i);
     
-    // Línea separadora
     doc.setDrawColor(colors.lightGray[0], colors.lightGray[1], colors.lightGray[2]);
     doc.setLineWidth(0.5);
     doc.line(margins.left, pageHeight - margins.bottom - 10, pageWidth - margins.right, pageHeight - margins.bottom - 10);
     
-    // Texto del footer
     doc.setFontSize(fonts.footer.size);
     doc.setTextColor(colors.mediumGray[0], colors.mediumGray[1], colors.mediumGray[2]);
     doc.setFont('helvetica', fonts.footer.weight);
@@ -306,7 +278,6 @@ const createBudgetSection = (doc, works, total, startY) => {
   
   let currentY = startY;
   
-  // Encabezado "PRESUPUESTO" en negrita centrado
   doc.setFillColor(colors.lightGray[0], colors.lightGray[1], colors.lightGray[2]);
   doc.rect(margins.left, currentY, tableWidth, headerHeight, 'F');
   
@@ -317,19 +288,16 @@ const createBudgetSection = (doc, works, total, startY) => {
   
   currentY += headerHeight + 10;
   
-  // Lista de trabajos
   doc.setFontSize(fonts.tableContent.size);
   doc.setTextColor(colors.black[0], colors.black[1], colors.black[2]);
   doc.setFont('helvetica', 'normal');
   
   works.forEach((work, index) => {
-    // Verificar espacio en página
     if (currentY + 8 > PDF_CONFIG.pageHeight - PDF_CONFIG.margins.bottom - 20) {
       doc.addPage();
       currentY = PDF_CONFIG.margins.top;
     }
     
-    // Separador visual entre items (excepto el primero)
     if (index > 0) {
       doc.setDrawColor(colors.lightGray[0], colors.lightGray[1], colors.lightGray[2]);
       doc.setLineWidth(0.3);
@@ -337,33 +305,26 @@ const createBudgetSection = (doc, works, total, startY) => {
       currentY += 3;
     }
     
-    // Trabajo y monto en la misma línea (texto grande)
     doc.setFontSize(fonts.tableContent.size);
     doc.setTextColor(colors.black[0], colors.black[1], colors.black[2]);
     doc.setFont('helvetica', 'normal');
     
-    // Calcular espacio disponible para el texto del trabajo
     const montoText = `$${work.monto.toLocaleString()}`;
     const montoWidth = doc.getTextWidth(montoText);
-    const availableWidth = tableWidth - montoWidth - 20; // 20mm de margen entre texto y precio
+    const availableWidth = tableWidth - montoWidth - 20;
     
-    // Dividir el texto del trabajo si es muy largo
     const workLines = doc.splitTextToSize(work.trabajo, availableWidth);
     
-    // Trabajo a la izquierda (puede ser múltiples líneas)
     workLines.forEach((line, lineIndex) => {
       if (lineIndex === 0) {
-        // Primera línea: trabajo a la izquierda, monto a la derecha
         doc.text(line, margins.left + 5, currentY);
         doc.text(montoText, margins.left + tableWidth - 5, currentY, { align: 'right' });
       } else {
-        // Líneas adicionales: solo el texto del trabajo
         doc.text(line, margins.left + 5, currentY);
       }
       currentY += 6;
     });
     
-    // Descripción si existe (texto más pequeño)
     if (work.descripcion && work.descripcion.trim()) {
       const descLines = doc.splitTextToSize(work.descripcion, tableWidth - 10);
       descLines.forEach(line => {
@@ -371,8 +332,8 @@ const createBudgetSection = (doc, works, total, startY) => {
           doc.addPage();
           currentY = PDF_CONFIG.margins.top;
         }
-        doc.setFontSize(fonts.tableContent.size - 2); // Texto más pequeño
-        doc.setTextColor(colors.mediumGray[0], colors.mediumGray[1], colors.mediumGray[2]);
+        doc.setFontSize(fonts.tableContent.size);
+        doc.setTextColor(colors.black[0], colors.black[1], colors.black[2]);
         doc.setFont('helvetica', 'normal');
         doc.text(`  ${line}`, margins.left + 5, currentY);
         currentY += 4;
@@ -381,7 +342,6 @@ const createBudgetSection = (doc, works, total, startY) => {
     }
   });
   
-  // Línea separadora antes del total
   currentY += 5;
   doc.setDrawColor(colors.lightGray[0], colors.lightGray[1], colors.lightGray[2]);
   doc.setLineWidth(0.5);
@@ -402,13 +362,11 @@ const createBudgetSection = (doc, works, total, startY) => {
   currentY += 15;
   
   // Textos fijos al final
-  doc.setFontSize(fonts.tableContent.size);
+  doc.setFontSize(fonts.tableContent.size + 2);
   doc.setTextColor(colors.mediumGray[0], colors.mediumGray[1], colors.mediumGray[2]);
   doc.setFont('helvetica', 'normal');
   
-  doc.text('No incluye materiales a utilizar.', margins.left + 5, currentY);
-  currentY += 5;
-  doc.text('Duración del presupuesto: 30 días hábiles.', margins.left + 5, currentY);
+  doc.text('Este presupuesto no incluye materiales a utilizar y tiene una vigencia de 30 días hábiles.', margins.left + 5, currentY);
   
   return currentY + 10; // Espacio después del presupuesto
 };
@@ -517,7 +475,6 @@ export const generateBudgetPDF = (obraName = '', direccion = '', works = [], tot
  */
 export const generateAndShareBudgetPDF = async (obraName = '', direccion = '', works = [], total = 0) => {
   try {
-    // Validar parámetros
     const safeObraName = typeof obraName === 'string' ? obraName : '';
     const safeDireccion = typeof direccion === 'string' ? direccion : '';
     const safeWorks = Array.isArray(works) ? works : [];
@@ -525,7 +482,6 @@ export const generateAndShareBudgetPDF = async (obraName = '', direccion = '', w
     
     const doc = generateBudgetPDF(safeObraName, safeDireccion, safeWorks, safeTotal);
     
-    // Convertir a blob de forma segura
     let pdfBlob;
     try {
       pdfBlob = doc.output('blob');
@@ -533,13 +489,11 @@ export const generateAndShareBudgetPDF = async (obraName = '', direccion = '', w
       throw new Error('No se pudo crear el archivo PDF');
     }
     
-    // Intentar compartir con Web Share API si está disponible
     if (supportsWebShare() && supportsFileConstructor()) {
       try {
         const fileName = `AFS-PRESUPUESTO-${formatObraNameForFile(safeObraName)}-${new Date().toISOString().split('T')[0]}.pdf`;
         const file = new File([pdfBlob], fileName, { type: 'application/pdf' });
         
-        // Verificar si se puede compartir este archivo
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
           await navigator.share({
             title: 'AFS Presupuesto',
@@ -553,11 +507,9 @@ export const generateAndShareBudgetPDF = async (obraName = '', direccion = '', w
       }
     }
     
-    // Fallback: descargar el archivo
     downloadBudgetPDF(doc, safeObraName);
     
   } catch (error) {
-    // Mostrar error más específico
     let errorMessage = 'Error al generar el PDF. Por favor, intenta nuevamente.';
     
     if (error.message.includes('blob')) {
@@ -568,7 +520,6 @@ export const generateAndShareBudgetPDF = async (obraName = '', direccion = '', w
     
     alert(errorMessage);
     
-    // Intentar descarga de emergencia
     try {
       const doc = generateBudgetPDF(obraName, direccion, works, total);
       downloadBudgetPDF(doc, obraName);
@@ -585,7 +536,6 @@ export const generateAndShareBudgetPDF = async (obraName = '', direccion = '', w
  */
 const downloadBudgetPDF = (doc, obraName = '') => {
   try {
-    // Generar blob de forma segura
     let pdfBlob;
     try {
       pdfBlob = doc.output('blob');
@@ -603,11 +553,9 @@ const downloadBudgetPDF = (doc, obraName = '') => {
     
     document.body.appendChild(link);
     
-    // Intentar descarga
     try {
       link.click();
     } catch (clickError) {
-      // Fallback: abrir en nueva ventana
       try {
         window.open(url, '_blank');
       } catch (openError) {
@@ -615,7 +563,6 @@ const downloadBudgetPDF = (doc, obraName = '') => {
       }
     }
     
-    // Limpiar después de un tiempo
     setTimeout(() => {
       try {
         document.body.removeChild(link);
@@ -679,7 +626,6 @@ const supportsFileConstructor = () => {
  */
 export const generateAndSharePDF = async (materials = [], quantities = {}, obraName = '', brands = {}, direccion = '') => {
   try {
-    // Validar parámetros
     const safeMaterials = Array.isArray(materials) ? materials : [];
     const safeQuantities = typeof quantities === 'object' && quantities !== null ? quantities : {};
     const safeObraName = typeof obraName === 'string' ? obraName : '';
@@ -688,7 +634,6 @@ export const generateAndSharePDF = async (materials = [], quantities = {}, obraN
     
     const doc = generatePDF(safeMaterials, safeQuantities, safeObraName, safeBrands, safeDireccion);
     
-    // Convertir a blob de forma segura
     let pdfBlob;
     try {
       pdfBlob = doc.output('blob');
@@ -696,13 +641,11 @@ export const generateAndSharePDF = async (materials = [], quantities = {}, obraN
       throw new Error('No se pudo crear el archivo PDF');
     }
     
-    // Intentar compartir con Web Share API si está disponible
     if (supportsWebShare() && supportsFileConstructor()) {
       try {
         const fileName = `AFS-INSTALACION-${formatObraNameForFile(safeObraName)}-${new Date().toISOString().split('T')[0]}.pdf`;
         const file = new File([pdfBlob], fileName, { type: 'application/pdf' });
         
-        // Verificar si se puede compartir este archivo
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
           await navigator.share({
             title: 'AFS',
@@ -716,11 +659,9 @@ export const generateAndSharePDF = async (materials = [], quantities = {}, obraN
       }
     }
     
-    // Fallback: descargar el archivo
     downloadPDF(doc, safeObraName);
     
   } catch (error) {
-    // Mostrar error más específico
     let errorMessage = 'Error al generar el PDF. Por favor, intenta nuevamente.';
     
     if (error.message.includes('blob')) {
@@ -731,7 +672,6 @@ export const generateAndSharePDF = async (materials = [], quantities = {}, obraN
     
     alert(errorMessage);
     
-    // Intentar descarga de emergencia
     try {
       const doc = generatePDF(materials, quantities, obraName, brands);
       downloadPDF(doc, obraName);
@@ -748,7 +688,6 @@ export const generateAndSharePDF = async (materials = [], quantities = {}, obraN
  */
 const downloadPDF = (doc, obraName = '') => {
   try {
-    // Generar blob de forma segura
     let pdfBlob;
     try {
       pdfBlob = doc.output('blob');
@@ -766,11 +705,9 @@ const downloadPDF = (doc, obraName = '') => {
     
     document.body.appendChild(link);
     
-    // Intentar descarga
     try {
       link.click();
     } catch (clickError) {
-      // Fallback: abrir en nueva ventana
       try {
         window.open(url, '_blank');
       } catch (openError) {
@@ -778,7 +715,6 @@ const downloadPDF = (doc, obraName = '') => {
       }
     }
     
-    // Limpiar después de un tiempo
     setTimeout(() => {
       try {
         document.body.removeChild(link);
