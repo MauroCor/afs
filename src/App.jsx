@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import BudgetPage from './pages/BudgetPage';
 import InstallationsPage from './pages/InstallationsPage';
+import DeliveriesPage from './pages/DeliveriesPage';
 import LoginPage from './components/LoginPage';
 import './index.css';
 
@@ -15,6 +16,7 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/instalaciones" element={<InstallationsPage />} />
           <Route path="/presupuesto" element={<BudgetPage />} />
+          <Route path="/entregas" element={<DeliveriesPage />} />
         </Routes>
       </Router>
     </div>

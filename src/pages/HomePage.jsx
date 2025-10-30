@@ -60,8 +60,7 @@ const HomePage = () => {
         navigate('/presupuesto');
         break;
       case 'entregas':
-        // TODO: Implementar página de entregas
-        alert('Funcionalidad de entregas próximamente');
+        navigate('/entregas');
         break;
       default:
         break;
