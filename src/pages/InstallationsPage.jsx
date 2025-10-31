@@ -5,6 +5,7 @@ import { sharePDF } from '../utils/pdf/generator';
 import CategorySection from '../components/installations/InstallationsCategorySection';
 import AddMaterialModal from '../components/installations/AddMaterialModal';
 import InstallationTypeCards from '../components/installations/InstallationTypeCards';
+import ClientSelector from '../components/ClientSelector';
 import Footer from '../components/Footer';
 import AppHeader from '../components/AppHeader';
 import ShareButton from '../components/ShareButton';
@@ -21,8 +22,7 @@ const InstallationsPage = () => {
     return initialQuantities;
   });
   const [brands, setBrands] = useState({});
-  const [obraName, setObraName] = useState('');
-  const [direccion, setDireccion] = useState('');
+  const [selectedClient, setSelectedClient] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -61,8 +61,7 @@ const InstallationsPage = () => {
       localStorage.removeItem('afs_authenticated');
       setIsAuthenticated(false);
       setQuantities(resetQuantities());
-      setObraName('');
-      setDireccion('');
+      setSelectedClient(null);
       navigate('/login', { replace: true });
     }
   };
@@ -86,6 +85,8 @@ const InstallationsPage = () => {
     setIsGeneratingPDF(true);
     
     try {
+      const obraName = selectedClient?.name || '';
+      const direccion = selectedClient?.address || '';
       await sharePDF('installation', { materials, quantities, obraName, brands, direccion });
     } catch (error) {
       console.error('Error al generar PDF:', error);
@@ -123,27 +124,12 @@ const InstallationsPage = () => {
               Volver
             </button>
 
-            {/* Campo nombre de obra */}
-            <div className="mb-4">
-              <input
-                type="text"
-                value={obraName}
-                onChange={(e) => setObraName(e.target.value)}
-                className="w-full text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg px-3 py-2 focus:border-afs-blue focus:outline-none"
-                placeholder="Obra de..."
-              />
-            </div>
-
-            {/* Campo dirección */}
-            <div className="mb-4">
-              <input
-                type="text"
-                value={direccion}
-                onChange={(e) => setDireccion(e.target.value)}
-                className="w-full text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg px-3 py-2 focus:border-afs-blue focus:outline-none"
-                placeholder="Dirección..."
-              />
-            </div>
+            {/* Selector de cliente */}
+            <ClientSelector
+              onSelectClient={setSelectedClient}
+              selectedClient={selectedClient}
+              required={true}
+            />
 
             {/* Lista de categorías: solo la seleccionada */}
             <div className="space-y-4 w-full min-w-0">
@@ -162,7 +148,7 @@ const InstallationsPage = () => {
               {/* Botón generar PDF */}
               <ShareButton
                 onGeneratePDF={handleGeneratePDF}
-                disabled={!obraName.trim()}
+                disabled={!selectedClient}
                 loading={isGeneratingPDF}
                 label="Generar PDF"
               />

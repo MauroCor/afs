@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import { formatCurrency } from '../../utils/format';
 import ShareButton from '../ShareButton';
+import ClientSelector from '../ClientSelector';
 
 const BudgetForm = ({ onGeneratePDF, isGeneratingPDF, onAddWork, works, total, selectedCategory, onCategoryChange }) => {
-  const [obraName, setObraName] = useState('');
-  const [direccion, setDireccion] = useState('');
+  const [selectedClient, setSelectedClient] = useState(null);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (obraName.trim()) {
+    if (selectedClient) {
+      const obraName = selectedClient.name || '';
+      const direccion = selectedClient.address || '';
       onGeneratePDF(obraName, direccion, works, total);
     }
   };
@@ -17,30 +19,12 @@ const BudgetForm = ({ onGeneratePDF, isGeneratingPDF, onAddWork, works, total, s
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      {/* Campo Obra de */}
-      <div className="mb-4">
-        <input
-          type="text"
-          id="obraName"
-          value={obraName}
-          onChange={(e) => setObraName(e.target.value)}
-          className="w-full text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg px-3 py-2 focus:border-afs-blue focus:outline-none"
-          placeholder="Obra de..."
-          required
-        />
-      </div>
-
-      {/* Campo Dirección */}
-      <div className="mb-4">
-        <input
-          type="text"
-          id="direccion"
-          value={direccion}
-          onChange={(e) => setDireccion(e.target.value)}
-          className="w-full text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg px-3 py-2 focus:border-afs-blue focus:outline-none"
-          placeholder="Dirección..."
-        />
-      </div>
+      {/* Selector de cliente */}
+      <ClientSelector
+        onSelectClient={setSelectedClient}
+        selectedClient={selectedClient}
+        required={true}
+      />
 
       {/* Campo Categoría */}
       <div className="mb-4">
@@ -95,7 +79,7 @@ const BudgetForm = ({ onGeneratePDF, isGeneratingPDF, onAddWork, works, total, s
       <ShareButton
         type="submit"
         loading={isGeneratingPDF}
-        disabled={!obraName.trim() || works.length === 0}
+        disabled={!selectedClient || works.length === 0}
       />
     </form>
   );
