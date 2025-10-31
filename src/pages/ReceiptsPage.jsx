@@ -77,7 +77,6 @@ const ReceiptsPage = () => {
 
   const handleDeleteBudget = (budgetId, event) => {
     event.stopPropagation();
-    const budget = activeBudgets.find(b => b.id === budgetId);
     const client = getClientById(selectedClient.id);
     const payments = client?.payments?.[budgetId] || [];
     
@@ -125,7 +124,6 @@ const ReceiptsPage = () => {
     try {
       let budgetId = selectedBudgetId;
       let montoTotal = parseMoneyInput(presupuestoTotal.replace(/[$.,]/g, ''));
-      let saldoPendienteNum = parseMoneyInput(saldoPendiente.replace(/[$.,]/g, ''));
 
       // Si no hay presupuesto seleccionado, crear uno nuevo
       if (!budgetId) {
@@ -139,8 +137,6 @@ const ReceiptsPage = () => {
           date: new Date().toISOString().split('T')[0],
           category: ''
         });
-        // Recalcular saldo pendiente inicial
-        saldoPendienteNum = montoTotal;
       }
 
       // Agregar pago
@@ -206,10 +202,6 @@ const ReceiptsPage = () => {
             </label>
             <div className="space-y-2">
               {activeBudgets.map((budget) => {
-                const client = getClientById(selectedClient.id);
-                const payments = client?.payments?.[budget.id] || [];
-                const canDelete = payments.length === 0;
-                
                 return (
                   <BudgetCard
                     key={budget.id}

@@ -38,7 +38,6 @@ const ClientSelector = ({ onSelectClient, selectedClient, required = false }) =>
     }
 
     const results = searchClients(searchTerm);
-    const exactMatch = findClientByName(searchTerm);
 
     if (results.length > 0) {
       setSearchResults(results);
@@ -273,7 +272,7 @@ const ClientSelector = ({ onSelectClient, selectedClient, required = false }) =>
               <input
                 type="text"
                 value={editingDireccion}
-                onChange={(e) => setEditingDireccion(e.target.value)}
+                onChange={(e) => setEditingDireccion(e.target.value.toUpperCase())}
                 className="w-full text-sm bg-white border border-gray-300 rounded-lg px-3 py-2 focus:border-afs-blue focus:outline-none"
                 placeholder="Dirección (opcional)"
               />
