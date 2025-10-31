@@ -273,10 +273,3 @@ export const initialMaterials = [
   { id: 234, name: "Aros p/cámara de inspección ø0400 de 10cm de alto", section: "Accesorios", category: "CLOACA CON ORING" },
   { id: 235, name: "Aerosol lubricante p/caños", section: "Accesorios", category: "CLOACA CON ORING" }
 ];
-
-export const categories = [
-  "FUSION GAS",
-  "FUSION AGUA", 
-  "CLOACA CON ORING",
-  "OTROS MATERIALES"
-];
