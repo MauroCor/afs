@@ -26,6 +26,7 @@ const InstallationsPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [modalCategory, setModalCategory] = useState(null);
 
   // Verificar autenticación al montar el componente
   useEffect(() => {
@@ -144,19 +145,19 @@ const InstallationsPage = () => {
               />
             </div>
 
-            {/* Lista de categorías: solo la seleccionada + OTROS MATERIALES */}
+            {/* Lista de categorías: solo la seleccionada */}
             <div className="space-y-4 w-full min-w-0">
-              {[selectedCategory, 'OTROS MATERIALES'].map(category => (
-                <CategorySection
-                  key={category}
-                  category={category}
-                  materials={materials}
-                  quantities={quantities}
-                  onQuantityChange={handleQuantityChange}
-                  onBrandChange={handleBrandChange}
-                  onAddMaterial={category === 'OTROS MATERIALES' ? () => setIsModalOpen(true) : null}
-                />
-              ))}
+              <CategorySection
+                category={selectedCategory}
+                materials={materials}
+                quantities={quantities}
+                onQuantityChange={handleQuantityChange}
+                onBrandChange={handleBrandChange}
+                onAddMaterial={() => {
+                  setModalCategory(selectedCategory);
+                  setIsModalOpen(true);
+                }}
+              />
               
               {/* Botón generar PDF */}
               <ShareButton
@@ -182,7 +183,10 @@ const InstallationsPage = () => {
                   Agrega tu primer material para comenzar
                 </p>
                 <button
-                  onClick={() => setIsModalOpen(true)}
+                  onClick={() => {
+                    setModalCategory(selectedCategory);
+                    setIsModalOpen(true);
+                  }}
                   className="btn-primary"
                 >
                   Agregar material
@@ -199,8 +203,12 @@ const InstallationsPage = () => {
       {/* Modal agregar material */}
       <AddMaterialModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => {
+          setIsModalOpen(false);
+          setModalCategory(null);
+        }}
         onAddMaterial={handleAddMaterial}
+        category={modalCategory}
       />
 
       {/* Footer */}

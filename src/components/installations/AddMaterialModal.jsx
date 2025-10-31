@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Modal from '../Modal';
 
-const AddMaterialModal = ({ isOpen, onClose, onAddMaterial }) => {
+const AddMaterialModal = ({ isOpen, onClose, onAddMaterial, category }) => {
   const [formData, setFormData] = useState({
     name: ''
   });
@@ -32,8 +32,8 @@ const AddMaterialModal = ({ isOpen, onClose, onAddMaterial }) => {
     const newMaterial = {
       id: newId,
       name: formData.name.trim(),
-      section: '',
-      category: 'OTROS MATERIALES'
+      section: '', // Se asignará automáticamente a "Otros" por la lógica de CategorySection
+      category: category || ''
     };
 
     onAddMaterial(newMaterial);
@@ -91,7 +91,7 @@ const AddMaterialModal = ({ isOpen, onClose, onAddMaterial }) => {
           </div>
         )}
         <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded">
-          <p className="text-sm">El material se agregará automáticamente a la categoría "OTROS MATERIALES"</p>
+          <p className="text-sm">El material se agregará automáticamente a la sección "Otros" de la categoría "{category}"</p>
         </div>
       </form>
     </Modal>

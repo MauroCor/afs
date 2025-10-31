@@ -18,7 +18,7 @@ const MaterialRow = ({ material, quantity = 0, onQuantityChange }) => {
           {material.name}
         </h3>
         <p className="text-xs text-gray-500 mt-1">
-          {material.section || (material.category === 'OTROS MATERIALES' ? 'Otros' : '')}
+          {material.section || 'Otros'}
         </p>
       </div>
       
