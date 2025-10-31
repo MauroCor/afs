@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import MaterialRow from './MaterialRow';
+import MaterialRow from './InstalationsMaterialRow';
 
 const CategorySection = ({ category, materials, quantities, onQuantityChange, onBrandChange, onAddMaterial }) => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -55,7 +55,7 @@ const CategorySection = ({ category, materials, quantities, onQuantityChange, on
       <button
         onClick={() => setIsExpanded(!isExpanded)}
         className="w-full px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors duration-200 flex items-center justify-between"
-      >
+        >
         <div className="flex items-center space-x-3">
           <h2 className="text-base font-semibold text-gray-900">
             {category}

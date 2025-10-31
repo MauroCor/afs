@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Footer from '../components/Footer';
-import logo from '../images/logo.png';
+import AppHeader from '../components/AppHeader';
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -27,7 +27,7 @@ const HomePage = () => {
   const cards = [
     {
       id: 'instalaciones',
-      title: 'Instalaciones',
+      title: 'INSTALACIONES',
       description: 'Planilla de materiales',
       icon: '🔧',
       color: 'bg-blue-500',
@@ -35,15 +35,15 @@ const HomePage = () => {
     },
     {
       id: 'presupuesto',
-      title: 'Presupuestos',
+      title: 'PRESUPUESTOS',
       description: 'Crear presupuestos',
       icon: '🧾',
       color: 'bg-green-500',
       hoverColor: 'hover:bg-green-600'
     },
     {
-      id: 'entregas',
-      title: 'Entregas',
+      id: 'recibos',
+      title: 'RECIBOS',
       description: 'Control de cobranzas',
       icon: '💰',
       color: 'bg-orange-500',
@@ -59,8 +59,8 @@ const HomePage = () => {
       case 'presupuesto':
         navigate('/presupuesto');
         break;
-      case 'entregas':
-        navigate('/entregas');
+      case 'recibos':
+        navigate('/recibos');
         break;
       default:
         break;
@@ -74,43 +74,14 @@ const HomePage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-mobile mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div></div>
-            
-            <div className="flex items-center w-64">
-              <img
-                src={logo}
-                alt="AFS Logo"
-                className="h-16 w-16 object-contain flex-shrink-0 mr-3"
-              />
-              <h1 className="text-lg font-bold text-gray-900">
-                Gestión de obras
-              </h1>
-            </div>
-            
-            <button
-              onClick={handleLogout}
-              className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm font-medium transition duration-200"
-              title="Cerrar sesión"
-            >
-              Salir
-            </button>
-          </div>
-        </div>
-      </div>
+      <AppHeader title="GESTIÓN DE OBRAS" onLogout={handleLogout} homePath="/" />
 
       {/* Contenido principal */}
       <div className="max-w-mobile mx-auto px-4 py-8">
         <div className="text-center mb-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            ¡ Bienvenido !
+            ¡BIENVENIDO!
           </h2>
-          <p className="text-gray-600">
-            Selecciona una opción para continuar
-          </p>
         </div>
 
         {/* Tarjetas */}

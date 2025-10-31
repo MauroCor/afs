@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { initialMaterials, categories } from '../data/materials';
-import { generateAndSharePDF } from '../utils/pdfGenerator';
-import CategorySection from '../components/CategorySection';
-import AddMaterialModal from '../components/AddMaterialModal';
+import { sharePDF } from '../utils/pdf/generator';
+import CategorySection from '../components/installations/InstallationsCategorySection';
+import AddMaterialModal from '../components/installations/AddMaterialModal';
 import Footer from '../components/Footer';
-import logo from '../images/logo.png';
+import AppHeader from '../components/AppHeader';
+import ShareButton from '../components/ShareButton';
 
 const InstallationsPage = () => {
   const navigate = useNavigate();
@@ -78,7 +79,7 @@ const InstallationsPage = () => {
     setIsGeneratingPDF(true);
     
     try {
-      await generateAndSharePDF(materials, quantities, obraName, brands, direccion);
+      await sharePDF('installation', { materials, quantities, obraName, brands, direccion });
     } catch (error) {
       console.error('Error al generar PDF:', error);
       alert('Error al generar el PDF. Por favor, intenta nuevamente.');
@@ -94,39 +95,7 @@ const InstallationsPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-mobile mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div></div>
-            
-            {/* Logo con título centrado - clickeable */}
-            <button
-              onClick={() => navigate('/')}
-              className="flex items-center hover:opacity-80 transition-opacity duration-200 w-64"
-              title="Volver al inicio"
-            >
-              <img
-                src={logo}
-                alt="AFS Logo"
-                className="h-16 w-16 object-contain flex-shrink-0 mr-3"
-              />
-              <h1 className="text-lg font-bold text-gray-900">
-                Instalaciones
-              </h1>
-            </button>
-            
-            {/* Botón de Cerrar Sesión */}
-            <button
-              onClick={handleLogout}
-              className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm font-medium transition duration-200"
-              title="Cerrar sesión"
-            >
-              Salir
-            </button>
-          </div>
-        </div>
-      </div>
+      <AppHeader title="INSTALACIONES" onLogout={handleLogout} homePath="/" />
 
       {/* Contenido principal */}
       <div className="w-full max-w-[400px] mx-auto px-4 py-6">
@@ -167,30 +136,12 @@ const InstallationsPage = () => {
           ))}
           
           {/* Botón generar PDF */}
-          <div className="flex justify-center">
-            <button
-              onClick={handleGeneratePDF}
-              disabled={isGeneratingPDF}
-              className="btn-primary text-base py-3 px-6 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <div className="flex items-center justify-center space-x-2">
-                <svg 
-                  className="w-5 h-5" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
-                >
-                  <path 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    strokeWidth={2} 
-                    d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" 
-                  />
-                </svg>
-                <span>Generar PDF</span>
-              </div>
-            </button>
-          </div>
+          <ShareButton
+            onGeneratePDF={handleGeneratePDF}
+            disabled={!obraName.trim()}
+            loading={isGeneratingPDF}
+            label="Generar PDF"
+          />
         </div>
 
         {/* Mensaje si no hay materiales */}

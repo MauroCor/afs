@@ -6,7 +6,7 @@ const Footer = () => {
       <div className="max-w-mobile mx-auto px-4">
         <div className="text-center">
           <div className="mb-2">
-            <h3 className="text-sm font-semibold mb-1">AFS - Gestión de obras</h3>
+            <h3 className="text-sm font-semibold mb-1">AFS - GESTIÓN DE OBRAS</h3>
           </div>
           
           <div className="border-t border-gray-700 pt-2">

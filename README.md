@@ -28,7 +28,7 @@ src/
 │   ├── ShareButton.jsx  # Botón de generar PDF
 │   └── LoginPage.jsx    # Página de autenticación
 ├── pages/
-│   └── BudgetPage.jsx   # Pantalla principal con estado
+│   └── BudgetsPage.jsx   # Pantalla principal con estado
 ├── utils/
 │   └── pdfGenerator.js  # Generador de PDF profesional
 └── data/

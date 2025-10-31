@@ -1,12 +1,14 @@
 import React from 'react';
 
-const ShareButton = ({ onGeneratePDF, disabled = false }) => {
+const ShareButton = ({ onGeneratePDF, label = 'Generar PDF', disabled = false, loading = false, type = 'button', fullWidth = false, noMargin = false }) => {
+  const isDisabled = disabled || loading;
   return (
-    <div className="flex justify-center mt-4">
+    <div className={`flex justify-center ${fullWidth ? 'w-full' : ''} ${noMargin ? '' : 'mt-4'}`}>
       <button
+        type={type}
         onClick={onGeneratePDF}
-        disabled={disabled}
-        className="btn-primary text-base py-3 px-6 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+        disabled={isDisabled}
+        className={`btn-primary text-base py-3 px-6 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed ${fullWidth ? 'w-full' : ''}`}
       >
         <div className="flex items-center justify-center space-x-2">
           <svg 
@@ -22,7 +24,7 @@ const ShareButton = ({ onGeneratePDF, disabled = false }) => {
               d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" 
             />
           </svg>
-          <span>Generar PDF</span>
+          <span>{loading ? 'Generando...' : label}</span>
         </div>
       </button>
     </div>

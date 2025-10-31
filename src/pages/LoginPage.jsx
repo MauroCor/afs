@@ -9,10 +9,7 @@ const LoginPage = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
-    // Usar variable de entorno para la contraseña
     const correctPassword = process.env.REACT_APP_PASSWORD;
-    
     if (password === correctPassword) {
       localStorage.setItem('afs_authenticated', 'true');
       navigate('/');
@@ -73,3 +70,5 @@ const LoginPage = () => {
 };
 
 export default LoginPage;
+
+

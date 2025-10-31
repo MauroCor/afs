@@ -1,10 +1,10 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import HomePage from './pages/HomePage';
-import BudgetPage from './pages/BudgetPage';
+import BudgetsPage from './pages/BudgetsPage';
 import InstallationsPage from './pages/InstallationsPage';
-import DeliveriesPage from './pages/DeliveriesPage';
-import LoginPage from './components/LoginPage';
+import ReceiptsPage from './pages/ReceiptsPage';
+import LoginPage from './pages/LoginPage';
 import './index.css';
 
 function App() {
@@ -15,8 +15,8 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/instalaciones" element={<InstallationsPage />} />
-          <Route path="/presupuesto" element={<BudgetPage />} />
-          <Route path="/entregas" element={<DeliveriesPage />} />
+          <Route path="/presupuesto" element={<BudgetsPage />} />
+          <Route path="/recibos" element={<ReceiptsPage />} />
         </Routes>
       </Router>
     </div>
