@@ -48,6 +48,14 @@ const HomePage = () => {
       icon: '💰',
       color: 'bg-orange-500',
       hoverColor: 'hover:bg-orange-600'
+    },
+    {
+      id: 'clientes',
+      title: 'CLIENTES',
+      description: 'Historial de PDFs',
+      icon: '👥',
+      color: 'bg-purple-500',
+      hoverColor: 'hover:bg-purple-600'
     }
   ];
 
@@ -61,6 +69,9 @@ const HomePage = () => {
         break;
       case 'recibos':
         navigate('/recibos');
+        break;
+      case 'clientes':
+        navigate('/clientes');
         break;
       default:
         break;
