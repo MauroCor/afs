@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { formatCurrency } from '../../utils/format';
 import ShareButton from '../ShareButton';
-import ClientSelector from '../ClientSelector';
+import ClientSelector from '../clients/ClientSelector';
 import { budgetWorksByCategory } from '../../data/budgetWorks';
 import { addBudget } from '../../utils/clientsStorage';
+import { createAndSaveClientPdf } from '../../utils/pdf/generator';
 
 const BudgetForm = ({ onGeneratePDF, isGeneratingPDF, onAddWork, works, total, selectedCategory }) => {
   const [selectedClient, setSelectedClient] = useState(null);
@@ -25,6 +26,11 @@ const BudgetForm = ({ onGeneratePDF, isGeneratingPDF, onAddWork, works, total, s
         });
       } catch (err) {
         console.error('Error al guardar el presupuesto:', err);
+      }
+      try {
+        createAndSaveClientPdf('budget', 'budgets', selectedClient.id, { obraName, direccion, works, total }, { source: 'BudgetsPage' });
+      } catch (e) {
+        console.error('Error al guardar PDF de presupuesto en cliente:', e);
       }
       onGeneratePDF(obraName, direccion, works, total);
     }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { searchClients, findClientByName, addClient, updateClient } from '../utils/clientsStorage';
-import Modal from './Modal';
+import { searchClients, findClientByName, addClient, updateClient } from '../../utils/clientsStorage';
+import Modal from '../Modal';
 
 const ClientSelector = ({ onSelectClient, selectedClient, required = false }) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -128,6 +128,8 @@ const ClientSelector = ({ onSelectClient, selectedClient, required = false }) =>
     }
     setIsEditing(false);
   };
+
+  
 
   const handleClear = () => {
     setSearchTerm('');
@@ -280,9 +282,12 @@ const ClientSelector = ({ onSelectClient, selectedClient, required = false }) =>
           </div>
         </Modal>
       )}
+
+      
     </div>
   );
 };
 
 export default ClientSelector;
+
 

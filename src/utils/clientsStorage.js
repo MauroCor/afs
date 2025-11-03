@@ -20,7 +20,12 @@ export const getClients = () => {
       return [];
     }
     const parsedData = JSON.parse(data);
-    return parsedData.clients || [];
+    const clients = (parsedData.clients || []).map(ensureClientPdfsShape);
+    // Persistir migración si faltaba estructura de pdfs
+    if (JSON.stringify(parsedData.clients) !== JSON.stringify(clients)) {
+      saveClients(clients);
+    }
+    return clients;
   } catch (error) {
     console.error('Error al obtener clientes:', error);
     return [];
@@ -91,6 +96,7 @@ export const addClient = (client) => {
     id: nextId,
     budgets: {},
     payments: {},
+    pdfs: { installations: [], budgets: [], receipts: [] },
     createdAt: new Date().toISOString()
   };
 
@@ -133,6 +139,71 @@ export const updateClient = (clientId, updates) => {
   saveClients(clients);
 
   return updatedClient;
+};
+
+/**
+ * Asegura que el cliente tenga la estructura de pdfs
+ * @param {Object} client
+ * @returns {Object} cliente con pdfs garantizado
+ */
+export const ensureClientPdfsShape = (client) => {
+  if (!client) return client;
+  const pdfs = client.pdfs || {};
+  return {
+    ...client,
+    pdfs: {
+      installations: Array.isArray(pdfs.installations) ? pdfs.installations : [],
+      budgets: Array.isArray(pdfs.budgets) ? pdfs.budgets : [],
+      receipts: Array.isArray(pdfs.receipts) ? pdfs.receipts : [],
+    },
+  };
+};
+
+/**
+ * Agrega un registro de PDF a un cliente
+ * @param {number} clientId
+ * @param {('installations'|'budgets'|'receipts')} type
+ * @param {{ filename:string, date:string, dataUrl:string, meta?:Object }} record
+ * @returns {Object|null} registro agregado o null si falló
+ */
+export const addClientPdf = (clientId, type, record) => {
+  const clients = getClients();
+  const index = clients.findIndex(c => c.id === clientId);
+  if (index === -1) return null;
+  const client = ensureClientPdfsShape(clients[index]);
+  const id = String(Date.now());
+  const item = { id, filename: record.filename, date: record.date || new Date().toISOString(), dataUrl: record.dataUrl, meta: record.meta || {} };
+  client.pdfs[type] = [...client.pdfs[type], item];
+  clients[index] = client;
+  saveClients(clients);
+  return item;
+};
+
+/**
+ * Obtiene la lista de PDFs por tipo para un cliente
+ * @param {number} clientId
+ * @param {('installations'|'budgets'|'receipts')} type
+ */
+export const getClientPdfs = (clientId, type) => {
+  const client = ensureClientPdfsShape(getClientById(clientId));
+  if (!client) return [];
+  return client.pdfs[type] || [];
+};
+
+/**
+ * Elimina un PDF almacenado para un cliente
+ * @param {number} clientId
+ * @param {('installations'|'budgets'|'receipts')} type
+ * @param {string} pdfId
+ */
+export const deleteClientPdf = (clientId, type, pdfId) => {
+  const clients = getClients();
+  const index = clients.findIndex(c => c.id === clientId);
+  if (index === -1) return;
+  const client = ensureClientPdfsShape(clients[index]);
+  client.pdfs[type] = (client.pdfs[type] || []).filter(p => p.id !== pdfId);
+  clients[index] = client;
+  saveClients(clients);
 };
 
 /**

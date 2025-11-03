@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { initialMaterials } from '../data/materials';
-import { sharePDF } from '../utils/pdf/generator';
+import { sharePDF, createAndSaveClientPdf } from '../utils/pdf/generator';
 import CategorySection from '../components/installations/InstallationsCategorySection';
 import AddMaterialModal from '../components/installations/AddMaterialModal';
 import InstallationTypeCards from '../components/installations/InstallationTypeCards';
-import ClientSelector from '../components/ClientSelector';
+import ClientSelector from '../components/clients/ClientSelector';
 import Footer from '../components/Footer';
 import AppHeader from '../components/AppHeader';
 import ShareButton from '../components/ShareButton';
@@ -87,6 +87,11 @@ const InstallationsPage = () => {
     try {
       const obraName = selectedClient?.name || '';
       const direccion = selectedClient?.address || '';
+      if (selectedClient?.id) {
+        // Generar y GUARDAR en el cliente (esto también hace el log del cliente completo)
+        createAndSaveClientPdf('installation', 'installations', selectedClient.id, { materials, quantities, obraName, brands, direccion }, { source: 'InstallationsPage' });
+      }
+      // Además, compartir/descargar como venías haciendo
       await sharePDF('installation', { materials, quantities, obraName, brands, direccion });
     } catch (error) {
       console.error('Error al generar PDF:', error);

@@ -1,6 +1,6 @@
 import React from 'react';
-import IconTrash from './IconTrash';
-import { formatCurrency } from '../utils/format';
+import IconTrash from '../IconTrash';
+import { formatCurrency } from '../../utils/format';
 
 const BudgetCard = ({ budget, onSelect, onDelete, canDelete, isSelected = false }) => {
   const formatDate = (dateString) => {

@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getActiveBudgets, addPayment, addBudget, deleteBudget, cancelBudget, getClientById } from '../utils/clientsStorage';
-import { sharePDF } from '../utils/pdf/generator';
+import { sharePDF, createAndSaveClientPdf } from '../utils/pdf/generator';
 import { formatCurrency, parseMoneyInput } from '../utils/format';
 import Footer from '../components/Footer';
 import ConfirmModal from '../components/ConfirmModal';
 import AppHeader from '../components/AppHeader';
 import ShareButton from '../components/ShareButton';
-import ClientSelector from '../components/ClientSelector';
-import BudgetCard from '../components/BudgetCard';
+import ClientSelector from '../components/clients/ClientSelector';
+import BudgetCard from '../components/budgets/BudgetCard';
 
 const ReceiptsPage = () => {
   const navigate = useNavigate();
@@ -148,7 +148,19 @@ const ReceiptsPage = () => {
       const updatedClient = getClientById(selectedClient.id);
       const updatedBudget = updatedClient.budgets[budgetId];
 
-      // Generar PDF
+      // Generar y guardar PDF en el cliente (dispara log de cliente completo)
+      try {
+        createAndSaveClientPdf('receipt', 'receipts', selectedClient.id, {
+          clienteName: client.name,
+          pago: { fecha: payment.date, monto: payment.amount },
+          montoTotal: updatedBudget.total,
+          saldoPendiente: updatedBudget.pending,
+        }, { source: 'ReceiptsPage', budgetId });
+      } catch (e) {
+        console.error('Error al guardar PDF de recibo en cliente:', e);
+      }
+
+      // Compartir/descargar PDF
       await sharePDF('receipt', {
         clienteName: client.name,
         pago: {
