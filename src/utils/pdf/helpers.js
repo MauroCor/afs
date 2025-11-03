@@ -49,8 +49,8 @@ export const shareOrDownload = async (doc, filename) => {
 
 export const buildFilename = (type, meta = {}) => {
   const date = new Date().toISOString().split('T')[0];
-  if (type === 'installation') return `AFS-INSTALACION-${formatObraNameForFile(meta.obraName || '')}-${date}.pdf`;
-  if (type === 'budget') return `AFS-PRESUPUESTO-${formatObraNameForFile(meta.obraName || '')}-${date}.pdf`;
+  if (type === 'installation') return `AFS-INSTALACION-${formatObraNameForFile(meta.clienteName || '')}-${date}.pdf`;
+  if (type === 'budget') return `AFS-PRESUPUESTO-${formatObraNameForFile(meta.clienteName || '')}-${date}.pdf`;
   if (type === 'receipt') {
     const cliente = (meta.clienteName || 'CLIENTE').toUpperCase().replace(/[^A-Z0-9]/g, '-').replace(/-+/g, '-').substring(0, 20);
     return `AFS-RECIBO-${cliente}-${date}.pdf`;

@@ -85,14 +85,14 @@ const InstallationsPage = () => {
     setIsGeneratingPDF(true);
     
     try {
-      const obraName = selectedClient?.name || '';
+      const clienteName = selectedClient?.name || '';
       const direccion = selectedClient?.address || '';
       if (selectedClient?.id) {
         // Generar y GUARDAR en el cliente (esto también hace el log del cliente completo)
-        createAndSaveClientPdf('installation', 'installations', selectedClient.id, { materials, quantities, obraName, brands, direccion }, { source: 'InstallationsPage' });
+        createAndSaveClientPdf('installation', 'installations', selectedClient.id, { materials, quantities, clienteName, brands, direccion }, { source: 'InstallationsPage' });
       }
       // Además, compartir/descargar como venías haciendo
-      await sharePDF('installation', { materials, quantities, obraName, brands, direccion });
+      await sharePDF('installation', { materials, quantities, clienteName, brands, direccion });
     } catch (error) {
       console.error('Error al generar PDF:', error);
       alert('Error al generar el PDF. Por favor, intenta nuevamente.');

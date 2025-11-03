@@ -152,6 +152,7 @@ const ReceiptsPage = () => {
       try {
         createAndSaveClientPdf('receipt', 'receipts', selectedClient.id, {
           clienteName: client.name,
+          direccion: client.address || '',
           pago: { fecha: payment.date, monto: payment.amount },
           montoTotal: updatedBudget.total,
           saldoPendiente: updatedBudget.pending,
@@ -163,6 +164,7 @@ const ReceiptsPage = () => {
       // Compartir/descargar PDF
       await sharePDF('receipt', {
         clienteName: client.name,
+        direccion: client.address || '',
         pago: {
           fecha: payment.date,
           monto: payment.amount

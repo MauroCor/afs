@@ -31,10 +31,10 @@ const BudgetsPage = () => {
     }
   };
 
-  const handleGenerateBudgetPDF = async (obraName, direccion, works, total) => {
+  const handleGenerateBudgetPDF = async (clienteName, direccion, works, total) => {
     setIsGeneratingBudgetPDF(true);
     try {
-      await sharePDF('budget', { obraName, direccion, works, total });
+      await sharePDF('budget', { clienteName, direccion, works, total });
     } catch (error) {
       console.error('Error al generar PDF de presupuesto:', error);
       alert('Error al generar el PDF de presupuesto. Por favor, intenta nuevamente.');

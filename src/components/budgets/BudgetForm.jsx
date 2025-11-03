@@ -15,7 +15,7 @@ const BudgetForm = ({ onGeneratePDF, isGeneratingPDF, onAddWork, works, total, s
   const handleSubmit = (e) => {
     e.preventDefault();
     if (selectedClient) {
-      const obraName = selectedClient.name || '';
+      const clienteName = selectedClient.name || '';
       const direccion = selectedClient.address || '';
       // Persistir el presupuesto para el cliente antes de generar el PDF
       try {
@@ -28,11 +28,11 @@ const BudgetForm = ({ onGeneratePDF, isGeneratingPDF, onAddWork, works, total, s
         console.error('Error al guardar el presupuesto:', err);
       }
       try {
-        createAndSaveClientPdf('budget', 'budgets', selectedClient.id, { obraName, direccion, works, total }, { source: 'BudgetsPage' });
+        createAndSaveClientPdf('budget', 'budgets', selectedClient.id, { clienteName, direccion, works, total }, { source: 'BudgetsPage' });
       } catch (e) {
         console.error('Error al guardar PDF de presupuesto en cliente:', e);
       }
-      onGeneratePDF(obraName, direccion, works, total);
+      onGeneratePDF(clienteName, direccion, works, total);
     }
   };
 

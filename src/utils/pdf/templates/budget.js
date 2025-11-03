@@ -1,15 +1,7 @@
 import { PDF_CONFIG } from '../config';
 
-const renderBudget = (doc, { works = [], total = 0, direccion = '' }) => {
+const renderBudget = (doc, { works = [], total = 0 }) => {
   let startY = PDF_CONFIG.margins.top + 50;
-  if (direccion && direccion.trim()) {
-    const { margins, colors } = PDF_CONFIG;
-    doc.setFontSize(11);
-    doc.setTextColor(colors.black[0], colors.black[1], colors.black[2]);
-    doc.setFont('helvetica', 'normal');
-    doc.text(`Dirección: ${direccion.toUpperCase()}`, margins.left, startY);
-    startY += 8;
-  }
 
   const { margins, pageWidth, colors, fonts } = PDF_CONFIG;
   const tableWidth = pageWidth - margins.left - margins.right;
@@ -103,14 +95,24 @@ const renderBudget = (doc, { works = [], total = 0, direccion = '' }) => {
   doc.setFontSize(fonts.tableContent.size + 2);
   doc.setTextColor(colors.mediumGray[0], colors.mediumGray[1], colors.mediumGray[2]);
   doc.setFont('helvetica', 'normal');
-  doc.text('Este presupuesto no incluye materiales a utilizar y tiene una vigencia de 30 días hábiles.', margins.left + 5, currentY);
+  const messageText = 'Este presupuesto no incluye materiales a utilizar y tiene una vigencia de 30 días hábiles.';
+  const availableWidth = tableWidth - 10;
+  const messageLines = doc.splitTextToSize(messageText, availableWidth);
+  messageLines.forEach((line) => {
+    doc.text(line, margins.left + 5, currentY);
+    currentY += 6;
+  });
 
   return currentY + 10;
 };
 
 const budgetTemplate = {
-  headerText: ({ obraName }) => (obraName ? `Obra de: ${obraName.toUpperCase()}` : 'Obra de: [Sin especificar]'),
-  shareMeta: ({ obraName }) => ({ title: 'AFS Presupuesto', text: `Presupuesto para ${obraName || 'la obra'}` }),
+  headerText: ({ clienteName = '', direccion = '' }) => {
+    const name = clienteName.trim().toUpperCase() || '[Sin especificar]';
+    const dir = direccion.trim().toUpperCase();
+    return dir ? `Cliente: ${name} (${dir})` : `Cliente: ${name}`;
+  },
+  shareMeta: ({ clienteName }) => ({ title: 'AFS Presupuesto', text: `Presupuesto para ${clienteName || 'la obra'}` }),
   render: renderBudget,
 };
 

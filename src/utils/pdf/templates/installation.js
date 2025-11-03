@@ -1,15 +1,7 @@
 import { PDF_CONFIG } from '../config';
 
-const renderInstallation = (doc, { materials = [], quantities = {}, brands = {}, direccion = '' }) => {
+const renderInstallation = (doc, { materials = [], quantities = {}, brands = {} }) => {
   let startY = PDF_CONFIG.margins.top + 50;
-  if (direccion && direccion.trim()) {
-    const { margins, colors } = PDF_CONFIG;
-    doc.setFontSize(11);
-    doc.setTextColor(colors.black[0], colors.black[1], colors.black[2]);
-    doc.setFont('helvetica', 'normal');
-    doc.text(`Dirección: ${direccion.toUpperCase()}`, margins.left, startY);
-    startY += 8;
-  }
 
   const materialsByCategory = {};
   for (const material of materials) {
@@ -92,8 +84,12 @@ const renderInstallation = (doc, { materials = [], quantities = {}, brands = {},
 };
 
 const installationTemplate = {
-  headerText: ({ obraName }) => (obraName ? `Obra de: ${obraName.toUpperCase()}` : 'Obra de: [Sin especificar]'),
-  shareMeta: ({ obraName }) => ({ title: 'AFS', text: `Materiales para ${obraName || 'la obra'}` }),
+  headerText: ({ clienteName = '', direccion = '' }) => {
+    const name = clienteName.trim().toUpperCase() || '[Sin especificar]';
+    const dir = direccion.trim().toUpperCase();
+    return dir ? `Cliente: ${name} (${dir})` : `Cliente: ${name}`;
+  },
+  shareMeta: ({ clienteName }) => ({ title: 'AFS', text: `Materiales para ${clienteName || 'la obra'}` }),
   render: renderInstallation,
 };
 

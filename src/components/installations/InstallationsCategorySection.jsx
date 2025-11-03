@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import MaterialRow from './InstalationsMaterialRow';
+import BrandSelector from './BrandSelector';
 
 const CategorySection = ({ category, materials, quantities, onQuantityChange, onBrandChange, onAddMaterial }) => {
   const [expandedSections, setExpandedSections] = useState({});
@@ -36,13 +37,20 @@ const CategorySection = ({ category, materials, quantities, onQuantityChange, on
     }));
   };
 
-  // Función para manejar cambio de marca
-  const handleBrandChange = (e) => {
-    const newBrand = e.target.value;
+  // Función para manejar cambio de marca (sincroniza estado local)
+  const handleBrandChange = (cat, newBrand) => {
     setBrand(newBrand);
     if (onBrandChange) {
-      onBrandChange(category, newBrand);
+      onBrandChange(cat, newBrand);
     }
+  };
+
+  // Definir botones rápidos según categoría
+  const getQuickBrands = () => {
+    if (category === 'FUSION GAS') {
+      return ['SIGAS', 'VANTEC', 'FUSIOGAS'];
+    }
+    return [];
   };
 
   // Función para obtener el color de fondo según la categoría
@@ -79,19 +87,12 @@ const CategorySection = ({ category, materials, quantities, onQuantityChange, on
 
       {/* Input de marca */}
       <div className="mb-4 px-0">
-        <div className="flex items-center space-x-3 w-full">
-          <label htmlFor={`brand-${category}`} className="text-sm font-medium text-gray-700 whitespace-nowrap">
-            Marca:
-          </label>
-          <input
-            type="text"
-            id={`brand-${category}`}
-            value={brand}
-            onChange={handleBrandChange}
-            className="w-48 text-sm bg-white border border-gray-300 rounded-lg px-3 py-2 focus:border-afs-blue focus:outline-none"
-            placeholder="Ingrese marca"
-          />
-        </div>
+        <BrandSelector
+          category={category}
+          brand={brand}
+          onBrandChange={handleBrandChange}
+          quickBrands={getQuickBrands()}
+        />
       </div>
 
       {/* Lista de secciones desplegables */}

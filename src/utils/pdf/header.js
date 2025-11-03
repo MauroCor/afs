@@ -15,7 +15,7 @@ export const createLogo = (doc, x, y, size = 20) => {
   doc.setDrawColor(200, 200, 200);
   doc.setLineWidth(0.5);
   doc.rect(x, y, size, size);
-  doc.setFontSize(12);
+  doc.setFontSize(15);
   doc.setTextColor(0, 0, 0);
   doc.setFont('helvetica', 'bold');
   doc.text('AFS', centerX, centerY, { align: 'center' });
@@ -38,15 +38,15 @@ export const createHeader = (doc, obraName) => {
   let infoY = logoY + 8;
   professionalInfo.forEach((line, index) => {
     if (index === 0) {
-      doc.setFontSize(12);
+      doc.setFontSize(15);
       doc.setFont('helvetica', 'bold');
       doc.setTextColor(...PDF_CONFIG.colors.black);
     } else if (index === 1) {
-      doc.setFontSize(10);
+      doc.setFontSize(13);
       doc.setFont('helvetica', 'bold');
       doc.setTextColor(...PDF_CONFIG.colors.darkGray);
     } else {
-      doc.setFontSize(9);
+      doc.setFontSize(12);
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(...PDF_CONFIG.colors.mediumGray);
     }
@@ -58,16 +58,19 @@ export const createHeader = (doc, obraName) => {
   doc.setLineWidth(0.5);
   doc.line(margins.left, separatorY, pageWidth - margins.right, separatorY);
   const contentY = separatorY + 8;
-  doc.setFontSize(11);
+  doc.setFontSize(14);
   doc.setTextColor(...PDF_CONFIG.colors.black);
   doc.setFont('helvetica', 'normal');
   doc.text(obraName || '', margins.left, contentY);
   const now = new Date();
-  const dateString = now.toLocaleDateString('es-ES', { year: 'numeric', month: '2-digit', day: '2-digit' });
-  doc.setFontSize(11);
+  const day = String(now.getDate()).padStart(2, '0');
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const year = now.getFullYear();
+  const dateString = `${day}/${month}/${year}`;
+  doc.setFontSize(14);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(...PDF_CONFIG.colors.black);
-  doc.text(`Fecha: ${dateString}`, pageWidth - margins.right - 5, contentY, { align: 'right' });
+  doc.text(`${dateString}`, pageWidth - margins.right - 5, contentY, { align: 'right' });
 };
 
 

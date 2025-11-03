@@ -15,7 +15,7 @@ const renderReceipt = (doc, { pago = {}, montoTotal = 0, saldoPendiente = 0 }) =
   doc.text('RECIBO', margins.left + tableWidth / 2, currentY + 6, { align: 'center' });
   currentY += headerHeight + 12;
 
-  const mainSize = 12;
+  const mainSize = 15;
   doc.setFontSize(mainSize);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(colors.black[0], colors.black[1], colors.black[2]);
@@ -42,7 +42,11 @@ const renderReceipt = (doc, { pago = {}, montoTotal = 0, saldoPendiente = 0 }) =
 };
 
 const receiptTemplate = {
-  headerText: ({ clienteName }) => (clienteName ? `Cliente: ${clienteName.toUpperCase()}` : 'Cliente: [SIN NOMBRE]'),
+  headerText: ({ clienteName = '', direccion = '' }) => {
+    const name = clienteName.trim().toUpperCase() || '[Sin especificar]';
+    const dir = direccion.trim().toUpperCase();
+    return dir ? `Cliente: ${name} (${dir})` : `Cliente: ${name}`;
+  },
   shareMeta: ({ clienteName }) => ({ title: 'AFS Recibo', text: `Recibo de ${clienteName || ''}` }),
   render: renderReceipt,
 };

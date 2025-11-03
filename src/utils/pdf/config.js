@@ -11,13 +11,13 @@ export const PDF_CONFIG = {
     white: [255, 255, 255]
   },
   fonts: {
-    title: { size: 20, weight: 'bold' },
-    subtitle: { size: 14, weight: 'normal' },
-    category: { size: 12, weight: 'bold' },
-    tableHeader: { size: 10, weight: 'bold' },
-    tableContent: { size: 9, weight: 'normal' },
-    footer: { size: 8, weight: 'normal' },
-    date: { size: 9, weight: 'normal' }
+    title: { size: 24, weight: 'bold' },
+    subtitle: { size: 17, weight: 'normal' },
+    category: { size: 15, weight: 'bold' },
+    tableHeader: { size: 13, weight: 'bold' },
+    tableContent: { size: 12, weight: 'normal' },
+    footer: { size: 11, weight: 'normal' },
+    date: { size: 12, weight: 'normal' }
   }
 };
 
