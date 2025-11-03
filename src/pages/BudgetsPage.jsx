@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { sharePDF } from '../utils/pdf/generator';
 import BudgetForm from '../components/budgets/BudgetForm';
-import AddBudgetModal from '../components/budgets/AddBudgetModal';
 import Footer from '../components/Footer';
 import AppHeader from '../components/AppHeader';
+import BudgetTypeCards from '../components/budgets/BudgetTypeCards';
 
 const BudgetsPage = () => {
   const navigate = useNavigate();
@@ -12,7 +12,7 @@ const BudgetsPage = () => {
   const [isGeneratingBudgetPDF, setIsGeneratingBudgetPDF] = useState(false);
   const [works, setWorks] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('');
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  
 
   useEffect(() => {
     const auth = localStorage.getItem('afs_authenticated');
@@ -43,15 +43,11 @@ const BudgetsPage = () => {
     }
   };
 
-  const handleAddWork = () => {
-    setIsModalOpen(true);
-  };
-
   const handleAddWorkSubmit = (newWork) => {
     setWorks(prev => [...prev, newWork]);
   };
 
-  const handleCategoryChange = (category) => {
+  const handleCategorySelect = (category) => {
     setSelectedCategory(category);
   };
 
@@ -66,24 +62,32 @@ const BudgetsPage = () => {
       <AppHeader title="PRESUPUESTOS" onLogout={handleLogout} homePath="/" />
 
       <div className="w-full max-w-[400px] mx-auto px-4 py-6">
-        <BudgetForm 
-          onGeneratePDF={handleGenerateBudgetPDF}
-          isGeneratingPDF={isGeneratingBudgetPDF}
-          onAddWork={handleAddWork}
-          works={works}
-          total={total}
-          selectedCategory={selectedCategory}
-          onCategoryChange={handleCategoryChange}
-        />
+        {!selectedCategory ? (
+          <BudgetTypeCards onSelectType={handleCategorySelect} />
+        ) : (
+          <>
+            <button
+              onClick={() => { setSelectedCategory(''); setWorks([]); }}
+              className="mb-4 text-sm text-gray-600 hover:text-gray-900 flex items-center"
+            >
+              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              Volver
+            </button>
+
+            <BudgetForm 
+              onGeneratePDF={handleGenerateBudgetPDF}
+              isGeneratingPDF={isGeneratingBudgetPDF}
+              onAddWork={handleAddWorkSubmit}
+              works={works}
+              total={total}
+              selectedCategory={selectedCategory}
+            />
+          </>
+        )}
         <div className="h-4"></div>
       </div>
-
-      <AddBudgetModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onAddWork={handleAddWorkSubmit}
-        selectedCategory={selectedCategory}
-      />
 
       <Footer />
     </div>

@@ -2,9 +2,13 @@ import React, { useState } from 'react';
 import { formatCurrency } from '../../utils/format';
 import ShareButton from '../ShareButton';
 import ClientSelector from '../ClientSelector';
+import { budgetWorksByCategory } from '../../data/budgetWorks';
 
-const BudgetForm = ({ onGeneratePDF, isGeneratingPDF, onAddWork, works, total, selectedCategory, onCategoryChange }) => {
+const BudgetForm = ({ onGeneratePDF, isGeneratingPDF, onAddWork, works, total, selectedCategory }) => {
   const [selectedClient, setSelectedClient] = useState(null);
+  const [trabajo, setTrabajo] = useState('');
+  const [descripcion, setDescripcion] = useState('');
+  const [monto, setMonto] = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -15,33 +19,114 @@ const BudgetForm = ({ onGeneratePDF, isGeneratingPDF, onAddWork, works, total, s
     }
   };
 
-  const categories = ['GAS', 'AGUA PLUVIAL', 'SANITARIO', 'CALEFACCION'];
+  const getCategoryColor = (category) => {
+    switch (category) {
+      case 'GAS':
+        return 'bg-amber-500';
+      case 'AGUA PLUVIAL':
+        return 'bg-sky-500';
+      case 'SANITARIO':
+        return 'bg-slate-600';
+      case 'CALEFACCION':
+        return 'bg-rose-500';
+      default:
+        return 'bg-gray-600';
+    }
+  };
+
+  const handleMontoChange = (e) => {
+    const value = e.target.value;
+    const numericValue = value.replace(/[^0-9.,]/g, '');
+    setMonto(numericValue);
+  };
+
+  const canAdd = () => {
+    const montoNumero = parseFloat(monto.replace(',', '.'));
+    return trabajo.trim() && Number.isFinite(montoNumero) && montoNumero > 0;
+  };
+
+  const handleAdd = (e) => {
+    e.preventDefault();
+    const montoNumero = parseFloat(monto.replace(',', '.'));
+    if (!canAdd()) return;
+    onAddWork({
+      trabajo: trabajo,
+      descripcion: (descripcion || '').trim(),
+      monto: montoNumero
+    });
+    setTrabajo('');
+    setDescripcion('');
+    setMonto('');
+  };
+
+  const trabajosOptions = budgetWorksByCategory[selectedCategory] || ['TRABAJO PERSONALIZADO'];
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      {/* Selector de cliente */}
       <ClientSelector
         onSelectClient={setSelectedClient}
         selectedClient={selectedClient}
         required={true}
       />
 
-      {/* Campo Categoría */}
-      <div className="mb-4">
+      <div className="mb-2">
+        <div className={`${getCategoryColor(selectedCategory)} text-white rounded-lg shadow-md px-4 py-3 text-center`}>
+          <h2 className="text-base font-semibold">{selectedCategory}</h2>
+        </div>
+      </div>
+
+      <div>
+        <label htmlFor="trabajo" className="block text-sm font-medium text-gray-700 mb-2">Trabajos:</label>
         <select
-          id="categoria"
-          value={selectedCategory}
-          onChange={(e) => onCategoryChange(e.target.value)}
-          className="w-full text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg px-3 py-2 focus:border-afs-blue focus:outline-none"
+          id="trabajo"
+          value={trabajo}
+          onChange={(e) => setTrabajo(e.target.value)}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         >
-          <option value="">Seleccione una categoría</option>
-          {categories.map(category => (
-            <option key={category} value={category}>{category}</option>
+          <option value="">Seleccione un trabajo</option>
+          {trabajosOptions.map((t, index) => (
+            <option key={`${t}-${index}`} value={t}>{t}</option>
           ))}
         </select>
       </div>
 
-      {/* Lista de trabajos agregados */}
+      <div>
+        <label htmlFor="descripcion" className="block text-sm font-medium text-gray-700 mb-2">Descripción:</label>
+        <textarea
+          id="descripcion"
+          value={descripcion}
+          onChange={(e) => setDescripcion(e.target.value)}
+          rows={3}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-vertical"
+          placeholder="Describa trabajos a realizar (opcional)"
+        />
+      </div>
+
+      <div>
+        <label htmlFor="monto" className="block text-sm font-medium text-gray-700 mb-2">Monto:</label>
+        <input
+          type="text"
+          inputMode="numeric"
+          pattern="[0-9.,]*"
+          id="monto"
+          value={monto}
+          onChange={handleMontoChange}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          placeholder="$..."
+        />
+      </div>
+
+      <div className="flex justify-center">
+        <button
+          type="button"
+          onClick={handleAdd}
+          disabled={!canAdd()}
+          className="btn-primary flex items-center justify-center space-x-1 text-sm py-2 px-4 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <span>Agregar trabajo</span>
+        </button>
+      </div>
+
       {works.length > 0 && (
         <div className="mt-4">
           <h3 className="text-lg font-medium text-gray-900 mb-2">Trabajos Agregados:</h3>
@@ -62,24 +147,11 @@ const BudgetForm = ({ onGeneratePDF, isGeneratingPDF, onAddWork, works, total, s
         </div>
       )}
 
-      {/* Botón Agregar */}
-      <div className="flex justify-center">
-        <button
-          type="button"
-          onClick={onAddWork}
-          disabled={!selectedCategory}
-          className="btn-primary flex items-center justify-center space-x-1 text-sm py-2 px-4 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <span className="text-lg">+</span>
-          <span>Agregar</span>
-        </button>
-      </div>
-
-      {/* Botón generar PDF */}
       <ShareButton
         type="submit"
         loading={isGeneratingPDF}
         disabled={!selectedClient || works.length === 0}
+        label="Generar PDF"
       />
     </form>
   );
