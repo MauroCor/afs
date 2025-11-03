@@ -3,6 +3,7 @@ import { formatCurrency } from '../../utils/format';
 import ShareButton from '../ShareButton';
 import ClientSelector from '../ClientSelector';
 import { budgetWorksByCategory } from '../../data/budgetWorks';
+import { addBudget } from '../../utils/clientsStorage';
 
 const BudgetForm = ({ onGeneratePDF, isGeneratingPDF, onAddWork, works, total, selectedCategory }) => {
   const [selectedClient, setSelectedClient] = useState(null);
@@ -15,6 +16,16 @@ const BudgetForm = ({ onGeneratePDF, isGeneratingPDF, onAddWork, works, total, s
     if (selectedClient) {
       const obraName = selectedClient.name || '';
       const direccion = selectedClient.address || '';
+      // Persistir el presupuesto para el cliente antes de generar el PDF
+      try {
+        addBudget(selectedClient.id, {
+          total: total,
+          date: new Date().toISOString().split('T')[0],
+          category: selectedCategory || ''
+        });
+      } catch (err) {
+        console.error('Error al guardar el presupuesto:', err);
+      }
       onGeneratePDF(obraName, direccion, works, total);
     }
   };

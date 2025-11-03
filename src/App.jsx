@@ -5,6 +5,7 @@ import BudgetsPage from './pages/BudgetsPage';
 import InstallationsPage from './pages/InstallationsPage';
 import ReceiptsPage from './pages/ReceiptsPage';
 import LoginPage from './pages/LoginPage';
+import ClientsPage from './pages/ClientsPage';
 import './index.css';
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
           <Route path="/instalaciones" element={<InstallationsPage />} />
           <Route path="/presupuesto" element={<BudgetsPage />} />
           <Route path="/recibos" element={<ReceiptsPage />} />
+          <Route path="/clientes" element={<ClientsPage />} />
         </Routes>
       </Router>
     </div>
