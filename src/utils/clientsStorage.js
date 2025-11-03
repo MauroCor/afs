@@ -238,12 +238,15 @@ export const addPayment = (clientId, budgetId, paymentData) => {
   client.payments[budgetId] = client.payments[budgetId] || [];
   client.payments[budgetId].push(payment);
 
-  // Recalcular pending
-  updateBudgetPending(clientId, budgetId);
-
-  const updatedClient = { ...client };
+  // Guardar inmediatamente el nuevo pago para que el recálculo tome el estado correcto
+  clients[clientIndex] = client;
   saveClients(clients);
 
+  // Recalcular pending (esta función también persiste el cambio)
+  updateBudgetPending(clientId, budgetId);
+
+  // Devolver el cliente actualizado desde storage
+  const updatedClient = getClientById(clientId);
   return { payment, client: updatedClient };
 };
 

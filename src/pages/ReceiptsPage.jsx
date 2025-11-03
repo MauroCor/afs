@@ -75,8 +75,7 @@ const ReceiptsPage = () => {
     }
   };
 
-  const handleDeleteBudget = (budgetId, event) => {
-    event.stopPropagation();
+  const handleDeleteBudget = (budgetId) => {
     const client = getClientById(selectedClient.id);
     const payments = client?.payments?.[budgetId] || [];
     
@@ -207,7 +206,7 @@ const ReceiptsPage = () => {
                     key={budget.id}
                     budget={budget}
                     onSelect={() => handleSelectBudget(budget.id)}
-                    onDelete={(e) => handleDeleteBudget(budget.id, e)}
+                    onDelete={() => handleDeleteBudget(budget.id)}
                     canDelete={true}
                     isSelected={selectedBudgetId === budget.id}
                   />
