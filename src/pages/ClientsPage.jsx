@@ -84,18 +84,36 @@ const ClientsPage = () => {
 
   const handleViewPdf = async (pdf) => {
     try {
-      // Generar un ObjectURL a partir del dataUrl para mayor compatibilidad
       const response = await fetch(pdf.dataUrl);
       const blob = await response.blob();
       const url = URL.createObjectURL(new Blob([blob], { type: 'application/pdf' }));
-      window.open(url, '_blank', 'noopener,noreferrer');
-      // Revocar luego de un tiempo para evitar cortar la carga en pestañas lentas
+
+      // Detectar iOS + Safari (suelen bloquear window.open con blob en nueva pestaña)
+      const ua = navigator.userAgent || '';
+      const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      const isSafari = /^((?!chrome|android).)*safari/i.test(ua);
+
+      const a = document.createElement('a');
+      a.href = url;
+      a.rel = 'noopener noreferrer';
+      a.target = (isIOS && isSafari) ? '_self' : '_blank';
+      document.body.appendChild(a);
+      try { a.click(); } finally { document.body.removeChild(a); }
+
+      // Revocar luego de un tiempo para no cortar cargas lentas en pestañas nuevas
       setTimeout(() => {
         try { URL.revokeObjectURL(url); } catch {}
       }, 30000);
-    } catch (e) {
-      // Fallback: intentar abrir directamente el dataUrl
-      try { window.open(pdf.dataUrl, '_blank', 'noopener,noreferrer'); } catch {}
+    } catch {
+      // Fallback: abrir el dataUrl directamente con un enlace
+      try {
+        const a = document.createElement('a');
+        a.href = pdf.dataUrl;
+        a.rel = 'noopener noreferrer';
+        a.target = '_blank';
+        document.body.appendChild(a);
+        try { a.click(); } finally { document.body.removeChild(a); }
+      } catch {}
     }
   };
 
