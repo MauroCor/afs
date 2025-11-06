@@ -16,7 +16,13 @@ export const budgetWorksByCategory = {
     'INSTALACIÓN DE CAÑERÍA DE GAS',
     'OTROS'
   ],
-  'AGUA PLUVIAL': [
+  AGUA: [
+    'Instalación de cañerías de agua',
+    'Reparación de cañerías de agua',
+    'Instalación de llaves de paso',
+    'OTROS'
+  ],
+  PLUVIAL: [
     'Relevamiento y colocación de canaletas',
     'Instalación de bajadas pluviales'
   ],

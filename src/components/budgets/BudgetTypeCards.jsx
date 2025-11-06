@@ -3,7 +3,8 @@ import React from 'react';
 const BudgetTypeCards = ({ onSelectType }) => {
   const types = [
     { id: 'GAS', name: 'GAS', color: 'bg-amber-500', hoverColor: 'hover:bg-amber-600' },
-    { id: 'AGUA PLUVIAL', name: 'AGUA PLUVIAL', color: 'bg-sky-500', hoverColor: 'hover:bg-sky-600' },
+    { id: 'AGUA', name: 'AGUA', color: 'bg-sky-500', hoverColor: 'hover:bg-sky-600' },
+    { id: 'PLUVIAL', name: 'PLUVIAL', color: 'bg-teal-500', hoverColor: 'hover:bg-teal-600' },
     { id: 'SANITARIO', name: 'SANITARIO', color: 'bg-slate-600', hoverColor: 'hover:bg-slate-700' },
     { id: 'CALEFACCION', name: 'CALEFACCION', color: 'bg-rose-500', hoverColor: 'hover:bg-rose-600' }
   ];

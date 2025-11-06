@@ -40,8 +40,10 @@ const BudgetForm = ({ onGeneratePDF, isGeneratingPDF, onAddWork, works, total, s
     switch (category) {
       case 'GAS':
         return 'bg-amber-500';
-      case 'AGUA PLUVIAL':
+      case 'AGUA':
         return 'bg-sky-500';
+      case 'PLUVIAL':
+        return 'bg-teal-500';
       case 'SANITARIO':
         return 'bg-slate-600';
       case 'CALEFACCION':
